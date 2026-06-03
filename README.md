@@ -1,86 +1,100 @@
 # merlon-lens
 
-A **read-only lens** over Koen Gheuens' Google “My Maps” *Swallowtail Merlons* map. It does not fork or replace his map — he keeps editing in Google — it tracks his **live pins** and adds two things Google Maps can't:
+A **read-only lens** over Koen Gheuens' Google "My Maps" *Swallowtail Merlons* map. It tracks his live pins and adds two things Google Maps can't: **IIIF manuscript viewing** and a **sourced merlon-authenticity verdict** per building (original medieval / restored / contested / undetermined), merged from a web cross-reference and the Voynich research corpus.
 
-1. **IIIF manuscript viewing** for the manuscript-depiction pins.
-2. A **sourced merlon-authenticity verdict** per building (is the swallowtail crenellation original medieval, a 19th–20th-c. restoration, contested, or undetermined?), merged from a web cross-reference and the Voynich research corpus.
+**Live:** https://merlon-lens.vercel.app
+
+---
+
+## ⚠️ Read this before pushing
+
+The repo has two layers:
+
+- **The live site** — needed to run the lens. Safe to deploy as-is, no secrets:
+  `api/`, `public/index.html`, `merged_enrichment.json`, `vercel.json`, `package.json`, `.gitignore`
+- **Optional automation** — only for auto-handling new pins. **These run on a schedule and will FAIL nightly (emailing you) if their secrets aren't set:**
+  `refresh/`, `.github/workflows/`
+
+If you just want the working map, deploy the live-site files and **leave the `.github/workflows/` folder out** until you've added the secrets below.
+
+---
 
 ## How it works
 
 ```
-Koen edits My Map ──► Google KML endpoint (no CORS)
-                              │
-                    api/kml.js  (Vercel proxy, +CORS, 5-min edge cache)
-                              │                         api/enrichment.js ──► Supabase public.merlon_enrichment
-                              └───────────────┬───────────────────┘
-                                              ▼
-                              public/index.html  (static, read-only)
-                                · join pins ⇄ enrichment by pin NAME
-                                · manuscript pins → IIIF (OpenSeadragon)
-                                · building pins   → colour-coded verdict (web ⊕ corpus)
+Koen edits My Map ─► Google KML (no CORS) ─► api/kml.js (Vercel proxy, +CORS, 5-min cache)
+                                                      │         api/enrichment.js ─► Supabase (table merlon_enrichment)
+                                                      └──────────────┬───────────────┘
+                                                                     ▼
+                                                       public/index.html (read-only)
+                                                         · manuscript pin → IIIF viewer, or hosted PDF
+                                                         · building pin   → colour-coded verdict (web ⊕ corpus)
 ```
 
-- **Pins** are live from Koen's map via `api/kml.js` (Google's KML export sends no CORS header, so the proxy is required). Map id baked in: `1y1hxOfGDFhqo97deJVvFNi7ASspTlp9v`.
-- **Enrichment** is served from Supabase by `api/enrichment.js` (table `public.merlon_enrichment`, public-read RLS).
-- The browser **never calls the Voynich MCP** — that is an authenticated *research* endpoint. The MCP is the *build-time* source of the corpus verdicts; `refresh/refresh.mjs` is the loader (below).
+The browser never calls the research corpus directly. Enrichment lives in Supabase; the page reads it.
 
 ## Deploy (Vercel)
 
-1. Create the repo (see the GitHub note) and push these files.
-2. Import into Vercel (or `vercel` from the repo root). No build step — it's static + serverless functions.
-3. Set env vars (optional — sensible defaults are baked into the functions):
-   - `SUPABASE_URL` = `https://ymaqlcfjmdwncdbjprmw.supabase.co`
-   - `SUPABASE_KEY` = `sb_publishable_9MpT1VOi0nvF-2N1LIS4Ew_h5dQWcp2`  *(publishable key — safe to expose; read-only under RLS)*
-4. Open the deployment. The client fetches `/api/kml` + `/api/enrichment` same-origin. Send Koen the one URL.
-   - Optional: `?mid=<other_public_map_id>` points the lens at a different My Map.
+1. Push the repo (or just the live-site files) and import into Vercel — no build step.
+2. Defaults are baked in, so no env vars are required for the site to work. (Optional: `SUPABASE_URL`, `SUPABASE_KEY` — the publishable key, safe to expose.)
+3. Open the deployment URL. Send Koen the one link; his workflow is unchanged.
 
-## Refresh the enrichment (offline)
+## Manuscripts: IIIF and PDFs
 
-The verdicts/manifests in Supabase are produced by research (querying the corpus + web), assembled into `merged_enrichment.json`. To (re)load that into Supabase:
+- 13 manuscripts resolve to a live **IIIF manifest** (opens in the in-page viewer).
+- The 14 without public IIIF can show a **hosted PDF** instead:
+  1. Upload the PDF in Supabase → **Storage** → bucket **`manuscripts`** (public, PDF-only, 100 MB/file).
+  2. Copy its public URL, then attach it to the manuscript's row:
+     ```sql
+     update public.merlon_enrichment
+     set payload = payload || jsonb_build_object('pdf','PASTE_PUBLIC_URL'),
+         updated_at = now()
+     where pin = 'EXACT MANUSCRIPT NAME';
+     ```
+  3. That pin then shows a "📄 Open PDF" button. Only host scans you have the right to (your own / public-domain).
 
-```bash
-SUPABASE_URL=https://ymaqlcfjmdwncdbjprmw.supabase.co \
-SUPABASE_SERVICE_KEY=<service_role key from Supabase dashboard> \
-node refresh/refresh.mjs
-```
+## Keeping it current as Koen adds pins
 
-- Needs the **service_role** key (writes are blocked for the publishable key by RLS). Get it from Supabase → Project Settings → API. Keep it out of the repo (`.env` is gitignored).
-- Idempotent (upsert on pin). Stores only the *informative* rows; absent buildings render as “undetermined”.
+- **Pins are automatic** — the page reads the live map each load; new pins appear within ~5 min. New buildings show grey "undetermined" until enriched.
+- **`refresh/gaps.mjs`** — run locally to list pins on the map that aren't in the ledger yet, plus still-undetermined buildings.
+- **`.github/workflows/daily-enrich.yml`** — daily: detects new building pins, drafts a verdict via OpenRouter (web-grounded), writes it to Supabase tagged `provenance:"ai-draft"`, `approved:false`. The page badges these "⚠ AI-generated — unverified" (dashed marker).
+- **`.github/workflows/load-enrichment.yml`** — when `merged_enrichment.json` changes on `main`, upserts it to Supabase via `refresh/refresh.mjs`.
+
+### Secrets/variables the automation needs (repo → Settings)
+- secret `OPENROUTER_API_KEY` — your OpenRouter key
+- secret `SUPABASE_SERVICE_KEY` — Supabase `service_role` key (writes; bypasses RLS)
+- var `OPENROUTER_MODEL` — your model slug (Variables tab)
+- secret `SUPABASE_URL` — optional (defaults to the project URL)
+
+Also enable: repo → Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests" (only if you re-introduce a PR-based flow).
+
+## Supabase notes
+
+- Project: `ymaqlcfjmdwncdbjprmw` (shared with the Voynich corpus). Table `public.merlon_enrichment` (`pin` PK, `type`, `payload` jsonb, `updated_at`), RLS on, public-read.
+- The public-read policy needs the grant too (this project revoked default grants):
+  ```sql
+  grant select on public.merlon_enrichment to anon, authenticated;
+  ```
+- `payload` for a building: `{ web:{verdict,basis,sources,confidence,scope}, corpus:{...}|null, agreement, provenance?, approved? }`; for a manuscript: `{ manifest, manifest_status, pdf? }`.
 
 ## Files
 
 ```
-api/kml.js            live-KML CORS proxy
-api/enrichment.js     serves Supabase enrichment as {records:{pin:{type,...}}}
-public/index.html     read-only client (Leaflet + OpenSeadragon + fflate)
-refresh/refresh.mjs   offline loader: merged_enrichment.json → Supabase upsert
-merged_enrichment.json canonical assembled enrichment (loader input + reference)
+api/kml.js              live-KML CORS proxy
+api/enrichment.js       serves Supabase enrichment as {records:{pin:{type,...}}}
+public/index.html       read-only client (Leaflet + OpenSeadragon + fflate; IIIF, PDF, verdicts)
+merged_enrichment.json  canonical assembled enrichment (loader input + reference)
+refresh/refresh.mjs     load the ledger into Supabase (service key)
+refresh/gaps.mjs        detect new / unresolved pins on the live map
+refresh/auto_enrich.mjs daily AI drafter -> Supabase (OpenRouter + service key)
+.github/workflows/daily-enrich.yml    daily detect + draft + write
+.github/workflows/load-enrichment.yml load ledger on change
 vercel.json package.json .gitignore
 ```
 
-## Data model (`merlon_enrichment`)
+## Honest caveats
 
-`pin text PK · type text (ms|building) · payload jsonb · updated_at`
-
-- `ms` → `{ manifest, manifest_status }`
-- `building` → `{ web:{verdict,basis,sources,confidence,scope}, corpus:{verdict,source}|null, agreement }`
-- verdicts: `ORIGINAL_MEDIEVAL · RESTORED_OR_ADDED · CONTESTED · UNDETERMINED`
-- agreement: `AGREE · CORPUS_EXTENDS · CORPUS_CORROBORATES · CORPUS_MENTION_ONLY · WEB_ONLY`
-
-## Caveats
-
-- The pin⇄enrichment **join is by name**. If Koen renames/adds a pin, it shows as plain/undetermined (safe failure, never a wrong verdict). Duplicate pin names collapse to one record (handle in the refresh step — e.g. Vignola, where a building and a fresco share a name, is forced to the building verdict).
-- **“Live” = within the 5-min edge cache**, and depends on Google's undocumented KML endpoint.
-- Enrichment reflects the last refresh. Re-run `refresh.mjs` after updating `merged_enrichment.json`.
-- Where building authenticity is documented it is overwhelmingly a 19th–20th-c. reconstruction; the standing buildings are weaker evidence for medieval merlon form than the manuscript depictions.
-
-## GitHub note
-
-This repo was prepared as a file bundle. Create a new empty repo named **merlon-lens** on GitHub, then from this folder:
-
-```bash
-git init && git add . && git commit -m "merlon-lens: live KML + IIIF + merlon-authenticity lens"
-git branch -M main
-git remote add origin git@github.com:<you>/merlon-lens.git
-git push -u origin main
-```
+- The pin⇄enrichment join is **by name**; renames de-link until refreshed. Duplicate names collapse to one record (e.g. Vignola is forced to the building verdict).
+- "Live" = within the 5-min cache; depends on Google's undocumented KML endpoint.
+- AI-drafted verdicts are published **labelled but unreviewed** until an admin pass exists; treat them as leads, not findings.
+- The ledger (`merged_enrichment.json`) and Supabase can diverge — AI drafts and PDF links are written to Supabase only. Re-running `refresh.mjs` loads the ledger and won't clobber them, but the durable record stays incomplete unless you also record them in the ledger.
