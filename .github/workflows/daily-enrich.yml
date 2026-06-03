@@ -1,0 +1,32 @@
+name: Daily auto-enrich new pins
+
+# Runs every day. Detects building pins newly added to Koen's map, drafts a verdict for
+# each via OpenRouter (web-grounded), and writes it live to Supabase tagged
+# provenance:"ai-draft", approved:false. The website badges these as "AI-generated -
+# unverified" until an admin approves them. Does nothing on days with no new pins.
+#
+# Secrets/vars needed:
+#   secret OPENROUTER_API_KEY      (your OpenRouter key)
+#   secret SUPABASE_SERVICE_KEY    (service_role, same project as the corpus)
+#   var    OPENROUTER_MODEL        (recommended — your model slug)
+#   secret SUPABASE_URL            (optional; defaults to the project URL)
+on:
+  schedule:
+    - cron: '0 7 * * *'   # daily, 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  enrich:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Detect new pins, draft with OpenRouter, write to Supabase
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node refresh/auto_enrich.mjs
