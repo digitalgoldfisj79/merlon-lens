@@ -1,0 +1,25 @@
+name: Load enrichment to Supabase
+
+# When merged_enrichment.json changes on main (i.e. you've researched and added
+# verdicts/manifests for new pins), upsert it into Supabase so the live site updates.
+# Requires repo secret SUPABASE_SERVICE_KEY (service_role). SUPABASE_URL optional
+# (refresh.mjs defaults to the project URL).
+on:
+  push:
+    branches: [main]
+    paths: ['merged_enrichment.json']
+  workflow_dispatch:
+
+jobs:
+  load:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Upsert enrichment
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: node refresh/refresh.mjs
