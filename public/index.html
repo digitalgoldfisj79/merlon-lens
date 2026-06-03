@@ -45,6 +45,7 @@
   .auth.o{background:#e4f1e8;border:1px solid #b6d8c2}.auth.o .vlabel{color:var(--good)}
   .auth.c{background:#f7efd6;border:1px solid #e3d29a}.auth.c .vlabel{color:var(--amber)}
   .auth.u{background:#eef0f2;border:1px solid #d7dde2}.auth.u .vlabel{color:var(--grey)}
+  .aibadge{display:block;margin:0 0 7px;padding:5px 8px;border-radius:6px;background:#fff3d6;border:1px dashed #d9a400;color:#8a5a00;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
   .corpus{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);font-size:10.5px;color:var(--mut)}
   .chip{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:1px 7px;color:var(--mut)}
   .btn{display:inline-block;margin:3px 4px 0 0;font-size:11.5px;font-weight:600;color:#fff;background:var(--ms);border:none;border-radius:6px;padding:6px 9px;cursor:pointer;text-decoration:none}
@@ -69,6 +70,7 @@
       <div class="row"><span class="sw c" style="background:var(--warn)"></span>building — restored / added<span class="cnt" id="c-r">0</span></div>
       <div class="row"><span class="sw c" style="background:var(--amber)"></span>building — contested<span class="cnt" id="c-c">0</span></div>
       <div class="row"><span class="sw c" style="background:var(--grey)"></span>building — undetermined<span class="cnt" id="c-u">0</span></div>
+      <div class="row" style="font-size:11px;color:var(--mut)"><span class="sw c" style="background:transparent;border:1px dashed #d9a400"></span>dashed = AI-drafted, unverified</div>
       <div class="row"><span class="sw" style="background:var(--ms);border-radius:3px"></span>manuscript depiction (IIIF)<span class="cnt" id="c-ms">0</span></div>
       <div class="row"><span class="sw d" style="background:var(--art)"></span>other art depiction<span class="cnt" id="c-art">0</span></div>
     </section>
@@ -162,8 +164,9 @@ function popBuilding(name,en){
   const corpus = en&&en.corpus ? `<div class="corpus"><b>corpus:</b> ${esc(en.corpus.verdict)} — ${esc(en.corpus.source)}</div>` : '';
   const agree = en&&en.agreement ? `<span class="chip">${esc(en.agreement)}</span>` : '';
   const q=encodeURIComponent(name+' swallowtail merlons crenellation');
+  const ai = (en&&en.provenance==='ai-draft') ? '<div class="aibadge">⚠ AI-generated · unverified draft</div>' : '';
   return `<div class="pop"><h3>${esc(name)}</h3>
-    <div class="auth ${cls}">
+    ${ai}<div class="auth ${cls}">
       <span class="vlabel">${(VLABEL[v]||VLABEL.UNDETERMINED)[1]}</span>${web.confidence?`<span class="vconf">${esc(web.confidence)}</span>`:''} ${agree}
       <div class="vbasis">${esc(basis)}</div>
       ${web.scope?`<div class="vmeta">scope: ${esc(web.scope)}</div>`:''}
@@ -175,6 +178,8 @@ function popBuilding(name,en){
 function popMs(name,en){
   const fol=folioOf(name); const status=en&&en.manifest_status;
   const manifest = en&&en.manifest;
+  const pdf = en&&en.pdf;
+  const pdfBtn = pdf ? `<a class="btn" style="background:var(--warn)" href="${pdf}" target="_blank" rel="noopener">📄 Open PDF</a>` : '';
   const id='ms_'+Math.random().toString(36).slice(2,8);
   const links=`<div style="margin-top:8px;font-size:11px">
     <a href="https://iiif.biblissima.fr/en/search?q=${encodeURIComponent(name)}" target="_blank" rel="noopener">Biblissima</a> ·
@@ -186,11 +191,11 @@ function popMs(name,en){
       <div style="margin-top:5px;font-size:10.5px"><a href="${manifest}" target="_blank" rel="noopener">manifest.json ↗</a></div>`;
   } else {
     body=`<div style="font-size:11.5px;color:var(--mut)">${esc(status||'No public IIIF manifest found.')}</div>
-      <input class="ipaste" placeholder="paste a viewer/manifest URL → open" onkeydown="if(event.key==='Enter'){var u=normalizeManifest(this.value);if(u)openIIIF(u,'${esc(name).replace(/'/g,'')}');}">`;
+      ${pdf?'':'<input class="ipaste" placeholder="paste a viewer/manifest URL → open" onkeydown="if(event.key===\'Enter\'){var u=normalizeManifest(this.value);if(u)openIIIF(u,\''+esc(name).replace(/'/g,'')+'\');}">'}`;
   }
   return `<div class="pop"><h3>${esc(name)}</h3>
     <div class="meta">manuscript depiction${fol?(' · '+fol):''}</div>
-    ${body}${links}</div>`;
+    ${pdfBtn}${body}${links}</div>`;
 }
 function popArt(name){
   const q=encodeURIComponent(name);
@@ -213,7 +218,8 @@ function addPin(name,lat,lon,type,en){
     const v=(en&&en.web&&en.web.verdict)||'UNDETERMINED';
     const col={RESTORED_OR_ADDED:'var(--warn)',ORIGINAL_MEDIEVAL:'var(--good)',CONTESTED:'var(--amber)',UNDETERMINED:'var(--grey)'}[v];
     counts[{RESTORED_OR_ADDED:'r',ORIGINAL_MEDIEVAL:'o',CONTESTED:'c',UNDETERMINED:'u'}[v]]++;
-    marker=L.circleMarker([lat,lon],{radius:6,color:col,fillColor:col,fillOpacity:.82,weight:1.5,opacity:1});
+    const aiDraft = en&&en.provenance==='ai-draft';
+    marker=L.circleMarker([lat,lon],{radius:6,color:col,fillColor:col,fillOpacity:aiDraft?0.32:0.82,weight:1.5,opacity:1,dashArray:aiDraft?'3 3':null});
     marker.bindPopup(()=>popBuilding(name,en),{maxWidth:300});
   }
   marker.addTo(map);
