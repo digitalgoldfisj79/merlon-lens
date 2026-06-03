@@ -19,10 +19,10 @@ jobs:
   enrich:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Detect new pins, draft with OpenRouter, write to Supabase
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
