@@ -1,0 +1,1324 @@
+{
+ "generator": "merlon-lens-enrichment",
+ "note": "Unified enrichment for the Swallowtail-Merlon lens, keyed by pin name. Manuscripts carry IIIF manifest/status; buildings carry merlon-authenticity verdicts merged from web (cross-reference) and corpus (Voynich MCP), with an agreement flag.",
+ "schema": {
+  "ms": [
+   "manifest",
+   "manifest_status"
+  ],
+  "building": [
+   "web{verdict,basis,sources,confidence,scope}",
+   "corpus{verdict,source}",
+   "agreement"
+  ]
+ },
+ "agreement_legend": {
+  "AGREE": "web & corpus same verdict",
+  "CORPUS_EXTENDS": "corpus adds dating where web was undetermined",
+  "CORPUS_CORROBORATES": "corpus supports web (regional)",
+  "CORPUS_MENTION_ONLY": "corpus names the building but gives no authenticity",
+  "WEB_ONLY": "corpus silent"
+ },
+ "records": {
+  "Sforzesco Castle": {
+   "type": "building",
+   "lat": 45.47048,
+   "lon": 9.17933,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Filarete-tower Ghibelline merlons are a c.1900 Beltrami reconstruction (original tower destroyed 1521); the rear façade is older Visconti fabric.",
+    "sources": [
+     "https://en.wikipedia.org/wiki/Sforza_Castle"
+    ],
+    "confidence": "high",
+    "scope": "Torre del Filarete"
+   },
+   "corpus": {
+    "verdict": "RESTORED_OR_ADDED",
+    "source": "Pelling 2002 (voynich.net archive): Torre del Filarete is a 19thC reconstruction; original destroyed 1521"
+   },
+   "agreement": "AGREE"
+  },
+  "Palatine Towers": {
+   "type": "building",
+   "lat": 45.07504,
+   "lon": 7.68469,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Medieval swallowtail merli demolished in 1872; one tower's brick crenellation rebuilt early-1900s (d'Andrade), the other left bare; 1934 Fascist work. The medieval merlons no longer exist.",
+    "sources": [
+     "https://archeocarta.org/torino-porta-palatina/"
+    ],
+    "confidence": "high",
+    "scope": "gate-towers"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel d'Enna/Schloss Enn": {
+   "type": "building",
+   "lat": 46.33182,
+   "lon": 11.30785,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castell'Arquato": {
+   "type": "building",
+   "lat": 44.85342,
+   "lon": 9.87047,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "The early-20th-c. ripristino of the Palazzo del Podestà's Ghibelline merli was criticised as casting doubt on authenticity; the Rocca merlons are called Visconti-original but unverified.",
+    "sources": [
+     "https://www.visitaltavaldarda.it/medievale-che-piu-medievale-non-si-puo-il-palazzo-del-podesta-a-castellarquato/"
+    ],
+    "confidence": "medium",
+    "scope": "Palazzo del Podestà"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello Haderburg - Salorno BZ": {
+   "type": "building",
+   "lat": 46.23542,
+   "lon": 11.20613,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Porta Soprana": {
+   "type": "building",
+   "lat": 44.40556,
+   "lon": 8.9345,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Per Musei di Genova, the present crenellation is from D'Andrade's 1882-1914 restoration (south tower 1930s); the merlons had vanished.",
+    "sources": [
+     "https://www.museidigenova.it/en/porta-soprana"
+    ],
+    "confidence": "high",
+    "scope": "gate-towers"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Ruderi Castello del Rivellino": {
+   "type": "building",
+   "lat": 42.41586,
+   "lon": 11.87564,
+   "web": {
+    "verdict": "ORIGINAL_MEDIEVAL",
+    "basis": "Identified as Palazzo del Rivellino, Tuscania (Lazio) — not Lombardy. Ruined town hall c.1253-63, abandoned after 1495; the surviving south wall keeps Ghibelline merlons + a corbelled turret, a reliable 13th-c. swallowtail example precisely because it escaped restoration.",
+    "sources": [
+     "https://fondoambiente.it/luoghi/palazzo-del-rivellino"
+    ],
+    "confidence": "medium",
+    "scope": "surviving south wall"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Castelcorniglio": {
+   "type": "building",
+   "lat": 44.64753,
+   "lon": 9.942,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castelgrande": {
+   "type": "building",
+   "lat": 46.19307,
+   "lon": 9.022,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "A fragment of original lower-curtain merli may survive inside the thickened Sforza walls (1486-89), but the 1981-91 Galfetti restoration returned parts to a 'presumed original appearance'; the UNESCO listing was contested over the restyling.",
+    "sources": [
+     "https://data.geo.admin.ch/ch.babs.kulturgueter/PDF/kgs_05270_gsk-i.pdf"
+    ],
+    "confidence": "medium",
+    "scope": "main curtain"
+   },
+   "corpus": {
+    "verdict": "CONTESTED",
+    "source": "Pelling 2021 (thread-3643): swallowtail present but c.1400-1450 layout unconfirmed"
+   },
+   "agreement": "AGREE"
+  },
+  "Castello di San Giorio": {
+   "type": "building",
+   "lat": 45.12878,
+   "lon": 7.18251,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Sasso Corbaro Castle": {
+   "type": "building",
+   "lat": 46.18821,
+   "lon": 9.03007,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "Pelling 2021 (thread-3643): Bellinzona trio; no authenticity"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Fenis Castle": {
+   "type": "building",
+   "lat": 45.73693,
+   "lon": 7.48888,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "14th-c. merlated walls, but the present look is dominated by d'Andrade (from 1895) and the 1935-42 'restauro integrativo' that added merlature and a turret.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castello_di_F%C3%A9nis"
+    ],
+    "confidence": "medium",
+    "scope": "curtain/turrets"
+   },
+   "corpus": {
+    "verdict": "REGIONAL_MIXED",
+    "source": "O'Donovan 2024 (thread): Val d'Aosta buildings have 'original, or renovated' swallowtail merlons (regional, not Fénis-specific)"
+   },
+   "agreement": "CORPUS_CORROBORATES"
+  },
+  "Sirmione Castle": {
+   "type": "building",
+   "lat": 45.49239,
+   "lon": 10.6084,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Official Musei Lombardia: the keep merlons were 'tutti ricostruiti nel restauro del 1920 circa'; present appearance set after 1919.",
+    "sources": [
+     "https://museilombardia.cultura.gov.it/musei/castello-scaligero-di-sirmione/"
+    ],
+    "confidence": "high",
+    "scope": "keep/curtain"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "JustAnotherTheory 2026 (thread-5487): strong VMS-parallel post; no authenticity statement"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Visconteo Castle Locarno": {
+   "type": "building",
+   "lat": 46.16788,
+   "lon": 8.7933,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "The 15th-c. Rusca ring wall is documented with swallowtail-merloned towers, but the complex was largely demolished 1531-32; the outer bodies are a 1924-29 reconstruction.",
+    "sources": [
+     "https://en.wikipedia.org/wiki/Visconti_Castle_(Locarno)"
+    ],
+    "confidence": "medium",
+    "scope": "outer walls"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Torre Pala": {
+   "type": "building",
+   "lat": 46.23992,
+   "lon": 9.10534,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel Grumello": {
+   "type": "building",
+   "lat": 46.17396,
+   "lon": 9.89907,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello Nuovo o Visconteo (XIV Secolo)": {
+   "type": "building",
+   "lat": 46.29187,
+   "lon": 10.26618,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Rocca di Vignola": {
+   "type": "building",
+   "lat": 44.47643,
+   "lon": 11.01027,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "Tourist sources date the wall-walk swallowtail merlatura to late-16th-c. roofing; the painted merlon decoration is a problematic early-20th-c. reconstruction.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Rocca_di_Vignola"
+    ],
+    "confidence": "medium",
+    "scope": "wall-walk"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Champorcher": {
+   "type": "building",
+   "lat": 45.62321,
+   "lon": 7.62249,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castle Foppoli": {
+   "type": "building",
+   "lat": 46.25143,
+   "lon": 10.25879,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Montebello Castle": {
+   "type": "building",
+   "lat": 46.19131,
+   "lon": 9.02653,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": {
+    "verdict": "DATING_PARTIAL",
+    "source": "Bluetoes101 2024 (thread-4320): inner wall 14thC, outer 15thC; Visconti-held to 1447"
+   },
+   "agreement": "CORPUS_EXTENDS"
+  },
+  "Montmayeur castle": {
+   "type": "building",
+   "lat": 45.55478,
+   "lon": 6.65191,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Saint Pierre": {
+   "type": "building",
+   "lat": 45.71034,
+   "lon": 7.22672,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "The fairytale form is an 1873-81 neo-Gothic reconstruction (Boggio for Baron Bollati); the merlated curtain belongs to this campaign.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castello_di_Saint-Pierre"
+    ],
+    "confidence": "high",
+    "scope": "curtain/turrets"
+   },
+   "corpus": {
+    "verdict": "REGIONAL_MIXED",
+    "source": "O'Donovan 2024 (thread): Val d'Aosta merlons are 'original, or renovated' (regional note)"
+   },
+   "agreement": "CORPUS_CORROBORATES"
+  },
+  "Castello di Blonay": {
+   "type": "building",
+   "lat": 45.70816,
+   "lon": 7.14081,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Caccamo": {
+   "type": "building",
+   "lat": 37.93189,
+   "lon": 13.66004,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "After 1813 the De Spuches created 'merli a coda di rondine ... in stile neomedievale' — the swallowtail merlons are a 19th-c. neo-medieval creation.",
+    "sources": [
+     "https://www.icastelli.it/it/sicilia/palermo/caccamo/castello-di-caccamo"
+    ],
+    "confidence": "high",
+    "scope": "merlons"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "O'Donovan via Koen 2021 (thread-3643): listed as a Sicilian swallowtail example; no authenticity statement"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Castello di Venere": {
+   "type": "building",
+   "lat": 38.03526,
+   "lon": 12.59217,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "O'Donovan via Koen 2021 (thread-3643): Sicily list; no authenticity"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Sperlinga Castle": {
+   "type": "building",
+   "lat": 37.76605,
+   "lon": 14.35358,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "O'Donovan via Koen 2021 (thread-3643): Sicily list; no authenticity"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Carini Castle": {
+   "type": "building",
+   "lat": 38.13347,
+   "lon": 13.18176,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "O'Donovan via Koen 2021 (thread-3643): Sicily list; no authenticity"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Castello di Brescia": {
+   "type": "building",
+   "lat": 45.54291,
+   "lon": 10.22514,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Tower at L'archet Morgex": {
+   "type": "building",
+   "lat": 45.75797,
+   "lon": 7.03408,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Porta Marina": {
+   "type": "building",
+   "lat": 43.31591,
+   "lon": 13.68426,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Piombino": {
+   "type": "building",
+   "lat": 42.92185,
+   "lon": 10.53133,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel Roncolo - Bolzano": {
+   "type": "building",
+   "lat": 46.51761,
+   "lon": 11.35908,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "Retains medieval character, but the 1520 gunpowder blast destroyed the curtain and wall-walk (rebuilt by 1531), with later restorations under Franz Joseph and in 1995-2000; sources do not isolate the merlons.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castel_Roncolo"
+    ],
+    "confidence": "medium",
+    "scope": "curtain"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castelvecchio Museum": {
+   "type": "building",
+   "lat": 45.4397,
+   "lon": 10.98779,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Appearance set by Avena's 1920s restoration and Carlo Scarpa; battlements heavily reconstructed; whether the originals were swallowtail is unknown.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castelvecchio_(Verona)"
+    ],
+    "confidence": "high",
+    "scope": "walls/towers"
+   },
+   "corpus": {
+    "verdict": "RESTORED_OR_ADDED",
+    "source": "davidjackson 2021 (ninja thread-3643): post-WWII Cecchini reconstruction; whether originals were swallowtail unknown"
+   },
+   "agreement": "AGREE"
+  },
+  "Norantola Castle": {
+   "type": "building",
+   "lat": 46.28184,
+   "lon": 9.17737,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello Mesocco": {
+   "type": "building",
+   "lat": 46.392,
+   "lon": 9.23275,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Buonconsiglio Castle Museum": {
+   "type": "building",
+   "lat": 46.07161,
+   "lon": 11.12626,
+   "web": {
+    "verdict": "ORIGINAL_MEDIEVAL",
+    "basis": "The great swallowtail merlatura of the Castelvecchio façade was built in the 15th c. by bishop Hinderbach ('tre ordini di merli a coda di rondine') — a documented 15th-c. campaign.",
+    "sources": [
+     "https://www.buonconsiglio.it/castello-del-buonconsiglio/buonconsiglio-il-castello/castelvecchio/"
+    ],
+    "confidence": "medium",
+    "scope": "Castelvecchio façade"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Guaita Tower": {
+   "type": "building",
+   "lat": 43.93526,
+   "lon": 12.44933,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Arco Castle": {
+   "type": "building",
+   "lat": 45.92177,
+   "lon": 10.88794,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "The Torre Grande keeps swallowtail merlons, but the castle was a quarried ruin (1703) radically restored from 1986; no source states whether the merli are original or rebuilt.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castello_di_Arco"
+    ],
+    "confidence": "low-medium",
+    "scope": "Torre Grande"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Bourtzi of Karystos\n\"Mpourtzi\" Castle": {
+   "type": "building",
+   "lat": 38.01287,
+   "lon": 24.42185,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Torri di Varano": {
+   "type": "building",
+   "lat": 41.91697,
+   "lon": 15.81379,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Mausoleo di Cecilia Metella": {
+   "type": "building",
+   "lat": 41.85207,
+   "lon": 12.52088,
+   "web": {
+    "verdict": "ORIGINAL_MEDIEVAL",
+    "basis": "The swallowtail crown was built by the Caetani when raising the tower, dated by the Parco Archeologico to 1302-03 — original 14th-c. fabric (the pinnacle is modern; the bifore restored c.1900).",
+    "sources": [
+     "https://www.parcoarcheologicoappiaantica.it/luoghi/mausoleo-di-cecilia-metella-e-castrum-caetani/"
+    ],
+    "confidence": "high",
+    "scope": "drum-top merlatura"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Palazzo Gotico": {
+   "type": "building",
+   "lat": 45.05251,
+   "lon": 9.69277,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Italia.it states the swallowtail battlements 'were added after the Unification of Italy' (post-1861); originally Guelph.",
+    "sources": [
+     "https://www.italia.it/en/emilia-romagna/piacenza/palazzo-gotico"
+    ],
+    "confidence": "high",
+    "scope": "façade/turrets"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Duomo di San Martino": {
+   "type": "building",
+   "lat": 43.84078,
+   "lon": 10.50563,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel Montani di Sopra": {
+   "type": "building",
+   "lat": 46.60086,
+   "lon": 10.82734,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Burgruine Neuhaus Maultasch": {
+   "type": "building",
+   "lat": 46.5251,
+   "lon": 11.25434,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Drena": {
+   "type": "building",
+   "lat": 45.96975,
+   "lon": 10.93919,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "Prominent swallowtail merlons, but a historic Tyrol map shows the keep with a pitched roof ('non è documentata una simile copertura'); fabric reflects 1980s+ restoration.",
+    "sources": [
+     "http://www.castellideltrentino.it/Siti/Castel-Drena"
+    ],
+    "confidence": "medium",
+    "scope": "keep/curtain"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Borgo di Drugolo": {
+   "type": "building",
+   "lat": 45.50113,
+   "lon": 10.47474,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello Scaligero di Malcesine": {
+   "type": "building",
+   "lat": 45.76612,
+   "lon": 10.80829,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "Tourist sources credit the Scaligeri (13th c.); a guide notes it is mostly pre-Scaligero, with both Guelph and Ghibelline merli — no clear original-vs-restored statement.",
+    "sources": [
+     "https://it.wikipedia.org/wiki/Castello_Scaligero_(Malcesine)"
+    ],
+    "confidence": "medium",
+    "scope": "tower/wall crowns"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Burg Hocheppan - Castel d’Appiano": {
+   "type": "building",
+   "lat": 46.49251,
+   "lon": 11.24256,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Porta di San Michele": {
+   "type": "building",
+   "lat": 45.88618,
+   "lon": 10.84204,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castle Ried": {
+   "type": "building",
+   "lat": 46.52044,
+   "lon": 11.36116,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel Schlandersberg": {
+   "type": "building",
+   "lat": 46.63654,
+   "lon": 10.78087,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello Cini Monselice": {
+   "type": "building",
+   "lat": 45.24166,
+   "lon": 11.75285,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di Valbona": {
+   "type": "building",
+   "lat": 45.2961,
+   "lon": 11.60238,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castello di San Pelagio": {
+   "type": "building",
+   "lat": 45.31384,
+   "lon": 11.82229,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Abbey of San Nazzaro e Celso": {
+   "type": "building",
+   "lat": 45.43768,
+   "lon": 8.42258,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Holy Monastery of Saint John the Theologian": {
+   "type": "building",
+   "lat": 37.30911,
+   "lon": 26.54761,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castel Varco": {
+   "type": "building",
+   "lat": 46.38374,
+   "lon": 11.28483,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Castle of Segonzano": {
+   "type": "building",
+   "lat": 46.1864,
+   "lon": 11.25138,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Torre Vanga": {
+   "type": "building",
+   "lat": 46.06972,
+   "lon": 11.11853,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Burg Untermontani": {
+   "type": "building",
+   "lat": 46.60463,
+   "lon": 10.82755,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Schloss Braunsberg": {
+   "type": "building",
+   "lat": 46.61511,
+   "lon": 11.13917,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Stenico Castle": {
+   "type": "building",
+   "lat": 46.05061,
+   "lon": 10.8519,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Anovelo da Imbonate - Lombardy region": {
+   "type": "ms",
+   "lat": 45.4526,
+   "lon": 9.18675,
+   "manifest": null,
+   "manifest_status": "Illuminator label, not one shelfmark. Coronation Missal (Basilica di Sant'Ambrogio, Milan, M 6) is not IIIF-served."
+  },
+  "Barcelona - Sarajevo Haggadah": {
+   "type": "ms",
+   "lat": 41.3874,
+   "lon": 2.16857,
+   "manifest": null,
+   "manifest_status": "Sarajevo, Nat. Museum of Bosnia-Herzegovina. Bespoke online edition — not standard IIIF."
+  },
+  "Beinecke MS 327 - Venice": {
+   "type": "ms",
+   "lat": 45.46638,
+   "lon": 12.43362,
+   "manifest": "https://collections.library.yale.edu/manifests/10269817",
+   "manifest_status": null
+  },
+  "Berlin, MS Ham. 390 - Venice": {
+   "type": "ms",
+   "lat": 45.51385,
+   "lon": 12.35619,
+   "manifest": null,
+   "manifest_status": "Staatsbibliothek zu Berlin. Digitisation in progress (Manuscripta Hamiltoniana); no PPN/manifest yet."
+  },
+  "Biblioteca Guarneriana (S. Daniele del Friuli) ms 200 - Florence": {
+   "type": "ms",
+   "lat": 43.76882,
+   "lon": 11.22869,
+   "manifest": null,
+   "manifest_status": "Biblioteca Guarneriana, San Daniele del Friuli. No confirmed public IIIF."
+  },
+  "BL Royal_ms_20_d_i_f193r - Naples": {
+   "type": "ms",
+   "lat": 40.85604,
+   "lon": 14.15608,
+   "manifest": null,
+   "manifest_status": "British Library. IIIF offline since the 28 Oct 2023 cyber-attack."
+  },
+  "BNF fr. 295 - Naples": {
+   "type": "ms",
+   "lat": 40.83463,
+   "lon": 14.35773,
+   "manifest": "https://gallica.bnf.fr/iiif/ark:/12148/btv1b8447879g/manifest.json",
+   "manifest_status": null
+  },
+  "BNF fr. 343 - Milan or Pavia": {
+   "type": "ms",
+   "lat": 45.29926,
+   "lon": 9.1735,
+   "manifest": "https://gallica.bnf.fr/iiif/ark:/12148/btv1b84584343/manifest.json",
+   "manifest_status": null
+  },
+  "BNF n.a. fr. 5243 - Milan": {
+   "type": "ms",
+   "lat": 45.38277,
+   "lon": 9.30604,
+   "manifest": "https://iiif.biblissima.fr/collections/manifest/d053e2816f244889cae559617eced158d5c5ad1d",
+   "manifest_status": null
+  },
+  "BNF Lat 757 - Milan": {
+   "type": "ms",
+   "lat": 45.58446,
+   "lon": 9.14947,
+   "manifest": "https://gallica.bnf.fr/iiif/ark:/12148/btv1b8470209d/manifest.json",
+   "manifest_status": null
+  },
+  "BNF Lat. 4939 - Naples": {
+   "type": "ms",
+   "lat": 40.85193,
+   "lon": 14.26743,
+   "manifest": "https://gallica.bnf.fr/iiif/ark:/12148/btv1b55002483j/manifest.json",
+   "manifest_status": null
+  },
+  "Bodleian MS. Laud Misc. 587 - Venice": {
+   "type": "ms",
+   "lat": 45.38204,
+   "lon": 12.29286,
+   "manifest": "https://iiif.bodleian.ox.ac.uk/iiif/manifest/1dac0552-b0f9-4dc6-82a9-3e94300522d4.json",
+   "manifest_status": null
+  },
+  "Bodleian MS. Tanner 190 - Venice": {
+   "type": "ms",
+   "lat": 45.44085,
+   "lon": 12.31552,
+   "manifest": "https://iiif.biblissima.fr/collections/manifest/b638410fd0add25db89fd10ec2ff7f63cdbc796e",
+   "manifest_status": null
+  },
+  "Bodmer 78- Venice": {
+   "type": "ms",
+   "lat": 45.38433,
+   "lon": 12.38367,
+   "manifest": "https://www.e-codices.unifr.ch/metadata/iiif/fmb-cb-0078/manifest.json",
+   "manifest_status": null
+  },
+  "BSB Clm 21562": {
+   "type": "ms",
+   "lat": 48.39656,
+   "lon": 11.72665,
+   "manifest": "https://iiif.biblissima.fr/collections/manifest/cf8abcfb13a10ac7a7e141cbcfb3adeb846accd4",
+   "manifest_status": null
+  },
+  "BSB clm 10268": {
+   "type": "ms",
+   "lat": 45.44809,
+   "lon": 11.89468,
+   "manifest": "https://api.digitale-sammlungen.de/iiif/presentation/v2/bsb00002270/manifest",
+   "manifest_status": null
+  },
+  "Cod. Vin., series nova 2644 - Lombardy region": {
+   "type": "ms",
+   "lat": 45.37246,
+   "lon": 9.0271,
+   "manifest": "https://digital.onb.ac.at/rep/iiif/10020524/manifest",
+   "manifest_status": null
+  },
+  "Descriptio Terrae Sanctae -Venice": {
+   "type": "ms",
+   "lat": 45.49332,
+   "lon": 12.2599,
+   "manifest": null,
+   "manifest_status": "Generic title — not pinned to one shelfmark."
+  },
+  "Egerton 3781- Genoa": {
+   "type": "ms",
+   "lat": 44.40565,
+   "lon": 8.94626,
+   "manifest": null,
+   "manifest_status": "British Library. IIIF offline since the 28 Oct 2023 cyber-attack."
+  },
+  "KBR ms. 9404-05 - Venice": {
+   "type": "ms",
+   "lat": 45.42297,
+   "lon": 12.40908,
+   "manifest": null,
+   "manifest_status": "Royal Library of Belgium (Brussels). No digitisate / no IIIF found."
+  },
+  "Lyon BM MS.195 - Lombardy": {
+   "type": "ms",
+   "lat": 45.45982,
+   "lon": 9.01578,
+   "manifest": null,
+   "manifest_status": "Bibliothèque municipale de Lyon. Possibly via Biblissima/numelyo; URL unverified."
+  },
+  "Morgan MS M.735 - Venice": {
+   "type": "ms",
+   "lat": 45.4325,
+   "lon": 12.23217,
+   "manifest": null,
+   "manifest_status": "Morgan Library (record 143827). No IIIF (legacy ICA viewer only); localisation may not match 'Venice'."
+  },
+  "Paris, ENSBA, Ms.Mas 0116": {
+   "type": "ms",
+   "lat": 45.40219,
+   "lon": 11.84628,
+   "manifest": null,
+   "manifest_status": "Beaux-Arts de Paris (Masson coll.). No confirmed IIIF."
+  },
+  "Russian National Library, Ms lat q v xvii.2 - Pavia, Convento dei Padri Agostiniani": {
+   "type": "ms",
+   "lat": 45.19108,
+   "lon": 9.15429,
+   "manifest": null,
+   "manifest_status": "National Library of Russia, St Petersburg. No IIIF."
+  },
+  "Sloane MS 4016 - Lombardy": {
+   "type": "ms",
+   "lat": 45.2504,
+   "lon": 9.25355,
+   "manifest": null,
+   "manifest_status": "British Library. IIIF offline since the 28 Oct 2023 cyber-attack."
+  },
+  "UBK 2° Ms. theol. 4 - Bavaria": {
+   "type": "ms",
+   "lat": 48.37615,
+   "lon": 10.91496,
+   "manifest": null,
+   "manifest_status": "Universitätsbibliothek Kassel (ORKA). Not resolved."
+  },
+  "Vat.lat.2761 - Venice": {
+   "type": "ms",
+   "lat": 45.47364,
+   "lon": 12.34079,
+   "manifest": "https://digi.vatlib.it/iiif/MSS_Vat.lat.2761/manifest.json",
+   "manifest_status": null
+  },
+  "FRESCO Sterzing/Vipiteno Church of the Holy Spirit": {
+   "type": "art",
+   "lat": 46.89925,
+   "lon": 11.43136
+  },
+  "FRESCO Novacella Abbey": {
+   "type": "art",
+   "lat": 46.74263,
+   "lon": 11.64845
+  },
+  "FRESCO Auer": {
+   "type": "art",
+   "lat": 46.36617,
+   "lon": 11.31065
+  },
+  "FRESCO San Valentino church in Tramin": {
+   "type": "art",
+   "lat": 46.33219,
+   "lon": 11.23843
+  },
+  "FRESCO by Giotto, Basilica of Santa Croce in Florence": {
+   "type": "art",
+   "lat": 43.76782,
+   "lon": 11.26433
+  },
+  "FRESCO by Giotto, Scrovegni Chapel": {
+   "type": "art",
+   "lat": 45.41182,
+   "lon": 11.87954
+  },
+  "FRESCO by Giotto, Basilica of San Francesco d'Assisi": {
+   "type": "art",
+   "lat": 43.07497,
+   "lon": 12.6054
+  },
+  "FRESCO Cappella di San Michele": {
+   "type": "art",
+   "lat": 45.75144,
+   "lon": 7.53461
+  },
+  "FRESCO Ivrea": {
+   "type": "art",
+   "lat": 45.46728,
+   "lon": 7.88006
+  },
+  "FRESCO Kapelle St. Maria Magdalena": {
+   "type": "art",
+   "lat": 46.75651,
+   "lon": 9.46098
+  },
+  "FRESCO Castel Roncolo (Runkelstein) - Bolzano": {
+   "type": "art",
+   "lat": 46.51744,
+   "lon": 11.35878
+  },
+  "FRESCO Zwickenberg": {
+   "type": "art",
+   "lat": 46.76419,
+   "lon": 12.98313
+  },
+  "FRESCO Buonconsiglio Castle Museum": {
+   "type": "art",
+   "lat": 46.07155,
+   "lon": 11.12661
+  },
+  "St. Christoph am Arlberg": {
+   "type": "art",
+   "lat": 47.13242,
+   "lon": 10.2117
+  },
+  "FRESCO, Castello di Avio": {
+   "type": "art",
+   "lat": 45.74649,
+   "lon": 10.95167
+  },
+  "Kirche Sogn Gieri": {
+   "type": "art",
+   "lat": 46.80336,
+   "lon": 9.40882
+  },
+  "MEDAL Castel Sismondo": {
+   "type": "art",
+   "lat": 44.05979,
+   "lon": 12.56358
+  },
+  "STONE Castell'Arquato": {
+   "type": "art",
+   "lat": 44.85342,
+   "lon": 9.87047
+  },
+  "Fortifications of Rhodes": {
+   "type": "building",
+   "lat": 36.43496,
+   "lon": 28.21748,
+   "web": {
+    "verdict": "CONTESTED",
+    "basis": "Swallowtail merlons are a genuine medieval feature (1370s on St Paul's Gate), but the circuit was heavily restored under the Italian administration (1912-45).",
+    "sources": [
+     "https://www.petersommer.com/blog/greece-travel/rhodes-medieval-fortifications"
+    ],
+    "confidence": "medium",
+    "scope": "curtain merlons"
+   },
+   "corpus": {
+    "verdict": "MENTION_ONLY",
+    "source": "-JKP-/R.Sale (thread-92 / diffusion): cited as eastern diffusion endpoint; no building-specific authenticity"
+   },
+   "agreement": "CORPUS_MENTION_ONLY"
+  },
+  "Sudak (Genoese fortress)": {
+   "type": "building",
+   "lat": 44.85047,
+   "lon": 34.97618,
+   "web": {
+    "verdict": "UNDETERMINED",
+    "basis": "No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th-20th-c. reconstructions.",
+    "sources": [],
+    "confidence": "low",
+    "scope": "whole site"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  },
+  "Conjunto Monumental de la Alcazaba de Almería": {
+   "type": "building",
+   "lat": 36.84001,
+   "lon": -2.47015,
+   "web": {
+    "verdict": "RESTORED_OR_ADDED",
+    "basis": "Official source: 'los merlones añadidos en el siglo XX'; restitution done 'sin criterio histórico', some in precast concrete. NB pyramidal/capped, not swallowtail.",
+    "sources": [
+     "https://alcazabaalmeria.tumblr.com/post/174568739138"
+    ],
+    "confidence": "high (restoration) / low (form)",
+    "scope": "wall crowns"
+   },
+   "corpus": null,
+   "agreement": "WEB_ONLY"
+  }
+ }
+}
