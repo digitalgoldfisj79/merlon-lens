@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swallowtail Merlons — lens</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fflate/0.8.2/umd/index.js"></script>
+<style>
+  :root{
+    --paper:#f3eee4;--panel:#fbf8f1;--panel2:#f0e9da;--ink:#23282d;--mut:#6f7780;--line:#e2dac9;--line2:#cabfa8;
+    --ms:#7a4d12;--art:#1f6f8b;--good:#2e7d4f;--warn:#9a2a2a;--amber:#8a6a00;--grey:#5d6670;
+    --sans:system-ui,-apple-system,"Segoe UI",sans-serif;--mono:ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--paper);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  #app{display:flex;height:100vh;overflow:hidden}
+  #panel{width:330px;min-width:330px;height:100vh;overflow-y:auto;background:var(--panel);border-right:1px solid var(--line2)}
+  .hd{padding:18px 18px 14px;border-bottom:1px solid var(--line2)}
+  .hd h1{font-size:19px;margin:0 0 4px;font-weight:650}
+  .hd p{margin:6px 0 0;font-size:11.5px;color:var(--mut);line-height:1.45}
+  .hd a{color:var(--art)}
+  section{padding:14px 18px;border-bottom:1px solid var(--line)}
+  .lab{font-family:var(--mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut);margin:0 0 10px}
+  .row{display:flex;align-items:center;gap:9px;margin:6px 0;font-size:12.5px}
+  .sw{width:12px;height:12px;flex:none;border:1px solid #0003}.sw.c{border-radius:50%}.sw.d{transform:rotate(45deg)}
+  .cnt{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+  #status{font-size:11.5px;color:var(--mut);line-height:1.5}
+  #map{flex:1;height:100vh}
+  .leaflet-popup-content-wrapper{background:var(--panel);border:1px solid var(--line2);border-radius:9px}
+  .leaflet-popup-content{margin:11px 13px;font-size:12.5px;line-height:1.42;width:288px!important}
+  .pop h3{margin:0 0 5px;font-size:14px}
+  .pop .meta{font-family:var(--mono);font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+  .pop a{color:var(--art)}
+  .ms-glyph{width:18px;height:18px;border-radius:3px;background:var(--ms);color:#fff;font:600 11px/18px var(--mono);text-align:center}
+  .art-glyph{width:12px;height:12px;background:var(--art);transform:rotate(45deg);border:1px solid #fff}
+  .auth{margin:6px 0 9px;padding:7px 9px;border-radius:7px;font-size:11.5px;line-height:1.4}
+  .auth .vlabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+  .auth .vconf{font-family:var(--mono);font-size:9px;color:var(--mut);margin-left:7px}
+  .auth .vbasis{margin-top:5px}.auth .vmeta{margin-top:4px;font-size:10px;color:var(--mut)}
+  .auth .vmeta a{color:var(--art);text-decoration:none}
+  .auth.r{background:#f7e6e6;border:1px solid #e3b9b9}.auth.r .vlabel{color:var(--warn)}
+  .auth.o{background:#e4f1e8;border:1px solid #b6d8c2}.auth.o .vlabel{color:var(--good)}
+  .auth.c{background:#f7efd6;border:1px solid #e3d29a}.auth.c .vlabel{color:var(--amber)}
+  .auth.u{background:#eef0f2;border:1px solid #d7dde2}.auth.u .vlabel{color:var(--grey)}
+  .corpus{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);font-size:10.5px;color:var(--mut)}
+  .chip{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:1px 7px;color:var(--mut)}
+  .btn{display:inline-block;margin:3px 4px 0 0;font-size:11.5px;font-weight:600;color:#fff;background:var(--ms);border:none;border-radius:6px;padding:6px 9px;cursor:pointer;text-decoration:none}
+  .ipaste{width:100%;margin-top:6px;font-family:var(--mono);font-size:10px;border:1px solid var(--line2);border-radius:5px;padding:5px;background:#fff}
+  #osd-wrap{position:fixed;inset:0;background:rgba(20,18,14,.92);z-index:9999;display:none;flex-direction:column}
+  #osd-wrap .bar{display:flex;align-items:center;gap:12px;padding:9px 14px;color:#f3eee4;font-size:13px}
+  #osd-wrap .bar button{margin-left:auto;background:#3a342a;color:#f3eee4;border:1px solid #5a5040;border-radius:6px;padding:6px 12px;cursor:pointer}
+  #osd{flex:1}
+  @media(max-width:760px){#app{flex-direction:column}#panel{width:100%;min-width:0;height:auto;max-height:42vh}#map{height:58vh}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="panel">
+    <div class="hd">
+      <h1>Swallowtail Merlons — lens</h1>
+      <p>A read-only view of Koen Gheuens' <a href="https://www.google.com/maps/d/viewer?mid=1y1hxOfGDFhqo97deJVvFNi7ASspTlp9v" target="_blank" rel="noopener">“Swallowtail Merlons” map</a>, live from his pins, with IIIF manuscripts and a sourced merlon-authenticity verdict per building.</p>
+    </div>
+    <section>
+      <p class="lab">Layers</p>
+      <div class="row"><span class="sw c" style="background:var(--good)"></span>building — original medieval<span class="cnt" id="c-o">0</span></div>
+      <div class="row"><span class="sw c" style="background:var(--warn)"></span>building — restored / added<span class="cnt" id="c-r">0</span></div>
+      <div class="row"><span class="sw c" style="background:var(--amber)"></span>building — contested<span class="cnt" id="c-c">0</span></div>
+      <div class="row"><span class="sw c" style="background:var(--grey)"></span>building — undetermined<span class="cnt" id="c-u">0</span></div>
+      <div class="row"><span class="sw" style="background:var(--ms);border-radius:3px"></span>manuscript depiction (IIIF)<span class="cnt" id="c-ms">0</span></div>
+      <div class="row"><span class="sw d" style="background:var(--art)"></span>other art depiction<span class="cnt" id="c-art">0</span></div>
+    </section>
+    <section>
+      <p class="lab">Status</p>
+      <div id="status">Loading live map…</div>
+    </section>
+    <section>
+      <p class="lab">Note</p>
+      <div id="status" style="color:var(--mut);font-size:11px;line-height:1.5">Where building authenticity is documented, these swallowtail merlons are overwhelmingly 19th–20th-c. reconstructions. The manuscript depictions may be more reliable evidence for medieval merlon form than the standing buildings. Absent buildings show as “undetermined” (no reliable source found), not as original.</div>
+    </section>
+  </div>
+  <div id="map"></div>
+</div>
+
+<div id="osd-wrap">
+  <div class="bar"><span id="osd-title"></span><button onclick="closeOSD()">Close ✕</button></div>
+  <div id="osd"></div>
+</div>
+
+<script>
+const MID = new URLSearchParams(location.search).get('mid') || '';
+const KML_URL = '/api/kml' + (MID ? ('?mid=' + encodeURIComponent(MID)) : '');
+const ENRICH_URL = '/api/enrichment';
+const VLABEL = { RESTORED_OR_ADDED:['r','restored / added'], ORIGINAL_MEDIEVAL:['o','original medieval'], CONTESTED:['c','contested'], UNDETERMINED:['u','undetermined'] };
+
+const map = L.map('map',{zoomControl:true}).setView([45.6,9.5],6);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+  {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap, © CARTO · pins © Koen Gheuens'}).addTo(map);
+
+const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const counts = {o:0,r:0,c:0,u:0,ms:0,art:0};
+function setStatus(h){ document.getElementById('status').innerHTML = h; }
+function bumpCounts(){ for(const k in counts){ const el=document.getElementById('c-'+k); if(el) el.textContent=counts[k]; } }
+
+function typeFromFolder(name){
+  const s=(name||'').toLowerCase();
+  if(s.includes('non-manuscript')) return 'art';
+  if(s.includes('manuscript')) return 'ms';
+  return 'building'; // "Buildings with swallowtail merlons" and "Uncertain/unclear buildings"
+}
+
+// ---------- IIIF helpers ----------
+function normalizeManifest(u){
+  u=(u||'').trim(); if(!u) return null;
+  let m;
+  if((m=u.match(/gallica\.bnf\.fr\/ark:\/(\d+)\/([a-z0-9]+)/i))) return `https://gallica.bnf.fr/iiif/ark:/${m[1]}/${m[2]}/manifest.json`;
+  if((m=u.match(/digi\.vatlib\.it\/view\/(MSS_[^/?#]+)/i))) return `https://digi.vatlib.it/iiif/${m[1]}/manifest.json`;
+  if((m=u.match(/digital\.bodleian\.ox\.ac\.uk\/objects\/([0-9a-f-]+)/i))) return `https://iiif.bodleian.ox.ac.uk/iiif/manifest/${m[1]}.json`;
+  if((m=u.match(/e-codices\.unifr\.ch\/.*\/(([a-z]+)-([a-z]+)-(\d+))/i))) return `https://www.e-codices.unifr.ch/metadata/iiif/${m[1]}/manifest.json`;
+  if(/manifest(\.json)?$/i.test(u) || /\/manifest/i.test(u)) return u;
+  return u; // pass through; the viewer is the test
+}
+async function manifestToTileSources(manifestUrl){
+  const m = await (await fetch(manifestUrl)).json();
+  const out=[];
+  const push=(svc,body)=>{
+    const id = svc && (svc['@id']||svc.id);
+    if(id){ out.push(id.replace(/\/$/,'')+'/info.json'); return; }
+    const img = body && (body['@id']||body.id);
+    if(img) out.push({type:'image',url:img});
+  };
+  if(Array.isArray(m.sequences)){ // IIIF Presentation v2
+    for(const c of (m.sequences[0]?.canvases||[])){ const res=c.images?.[0]?.resource; push(res?.service, res); }
+  } else if(Array.isArray(m.items)){ // v3
+    for(const c of m.items){ const b=c.items?.[0]?.items?.[0]?.body; const svc=Array.isArray(b?.service)?b.service[0]:b?.service; push(svc,b); }
+  }
+  return out;
+}
+let osd=null;
+async function openIIIF(manifestUrl,title){
+  const wrap=document.getElementById('osd-wrap'); document.getElementById('osd-title').textContent=title||'IIIF';
+  wrap.style.display='flex';
+  try{
+    const tiles=await manifestToTileSources(manifestUrl);
+    if(!tiles.length){ document.getElementById('osd-title').textContent=(title||'')+' — no images found in manifest'; return; }
+    if(osd){ osd.destroy(); osd=null; }
+    osd=OpenSeadragon({id:'osd',prefixUrl:'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/',
+      tileSources:tiles,sequenceMode:true,showReferenceStrip:tiles.length>1,referenceStripScroll:'horizontal'});
+  }catch(e){ document.getElementById('osd-title').textContent=(title||'')+' — failed to load manifest'; }
+}
+function closeOSD(){ const w=document.getElementById('osd-wrap'); w.style.display='none'; if(osd){osd.destroy();osd=null;} }
+
+// ---------- popups ----------
+function folioOf(name){ const m=(name||'').match(/\bf?\s?(\d{1,3})\s?([rv])\b/i); return m?('f'+m[1]+m[2].toLowerCase()):null; }
+
+function popBuilding(name,en){
+  const web=(en&&en.web)||{}; const v=web.verdict||'UNDETERMINED'; const cls=(VLABEL[v]||VLABEL.UNDETERMINED)[0];
+  const basis = web.basis || 'No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th–20th-c. reconstructions.';
+  const src = (web.sources||[]).map((u,i)=>`<a href="${u}" target="_blank" rel="noopener">${(web.sources.length>1)?('['+(i+1)+']'):'link'} ↗</a>`).join(' · ');
+  const corpus = en&&en.corpus ? `<div class="corpus"><b>corpus:</b> ${esc(en.corpus.verdict)} — ${esc(en.corpus.source)}</div>` : '';
+  const agree = en&&en.agreement ? `<span class="chip">${esc(en.agreement)}</span>` : '';
+  const q=encodeURIComponent(name+' swallowtail merlons crenellation');
+  return `<div class="pop"><h3>${esc(name)}</h3>
+    <div class="auth ${cls}">
+      <span class="vlabel">${(VLABEL[v]||VLABEL.UNDETERMINED)[1]}</span>${web.confidence?`<span class="vconf">${esc(web.confidence)}</span>`:''} ${agree}
+      <div class="vbasis">${esc(basis)}</div>
+      ${web.scope?`<div class="vmeta">scope: ${esc(web.scope)}</div>`:''}
+      ${src?`<div class="vmeta">source: ${src}</div>`:''}
+      ${corpus}
+    </div>
+    <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">↗ image search (verify merlons)</a></div>`;
+}
+function popMs(name,en){
+  const fol=folioOf(name); const status=en&&en.manifest_status;
+  const manifest = en&&en.manifest;
+  const id='ms_'+Math.random().toString(36).slice(2,8);
+  const links=`<div style="margin-top:8px;font-size:11px">
+    <a href="https://iiif.biblissima.fr/en/search?q=${encodeURIComponent(name)}" target="_blank" rel="noopener">Biblissima</a> ·
+    <a href="https://gallica.bnf.fr/services/engine/search/sru?query=${encodeURIComponent(name)}" target="_blank" rel="noopener">Gallica</a> ·
+    <a href="https://www.google.com/search?q=${encodeURIComponent(name+' IIIF manifest')}" target="_blank" rel="noopener">Web</a></div>`;
+  let body;
+  if(manifest){
+    body=`<a class="btn" href="#" onclick="openIIIF('${manifest}','${esc(name).replace(/'/g,'')}');return false;">Open IIIF viewer</a>
+      <div style="margin-top:5px;font-size:10.5px"><a href="${manifest}" target="_blank" rel="noopener">manifest.json ↗</a></div>`;
+  } else {
+    body=`<div style="font-size:11.5px;color:var(--mut)">${esc(status||'No public IIIF manifest found.')}</div>
+      <input class="ipaste" placeholder="paste a viewer/manifest URL → open" onkeydown="if(event.key==='Enter'){var u=normalizeManifest(this.value);if(u)openIIIF(u,'${esc(name).replace(/'/g,'')}');}">`;
+  }
+  return `<div class="pop"><h3>${esc(name)}</h3>
+    <div class="meta">manuscript depiction${fol?(' · '+fol):''}</div>
+    ${body}${links}</div>`;
+}
+function popArt(name){
+  const q=encodeURIComponent(name);
+  return `<div class="pop"><h3>${esc(name)}</h3><div class="meta">art depiction (non-manuscript)</div>
+    <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">↗ image search</a></div>`;
+}
+
+// ---------- marker creation ----------
+function addPin(name,lat,lon,type,en){
+  let marker;
+  if(type==='ms'){
+    counts.ms++;
+    marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="ms-glyph">M</div>',iconSize:[18,18],iconAnchor:[9,9]})});
+    marker.bindPopup(()=>popMs(name,en),{maxWidth:300});
+  }else if(type==='art'){
+    counts.art++;
+    marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="art-glyph"></div>',iconSize:[12,12],iconAnchor:[6,6]})});
+    marker.bindPopup(()=>popArt(name),{maxWidth:280});
+  }else{ // building
+    const v=(en&&en.web&&en.web.verdict)||'UNDETERMINED';
+    const col={RESTORED_OR_ADDED:'var(--warn)',ORIGINAL_MEDIEVAL:'var(--good)',CONTESTED:'var(--amber)',UNDETERMINED:'var(--grey)'}[v];
+    counts[{RESTORED_OR_ADDED:'r',ORIGINAL_MEDIEVAL:'o',CONTESTED:'c',UNDETERMINED:'u'}[v]]++;
+    marker=L.circleMarker([lat,lon],{radius:6,color:col,fillColor:col,fillOpacity:.82,weight:1.5,opacity:1});
+    marker.bindPopup(()=>popBuilding(name,en),{maxWidth:300});
+  }
+  marker.addTo(map);
+  return marker;
+}
+
+// ---------- load ----------
+async function loadKmlText(){
+  const r=await fetch(KML_URL);
+  if(!r.ok) throw new Error('KML proxy '+r.status);
+  const ct=(r.headers.get('content-type')||'').toLowerCase();
+  const buf=new Uint8Array(await r.arrayBuffer());
+  // KMZ (zip) starts with PK\x03\x04
+  if(ct.includes('kmz')||ct.includes('zip')||(buf[0]===0x50&&buf[1]===0x4b)){
+    const files=fflate.unzipSync(buf);
+    const kmlName=Object.keys(files).find(n=>n.toLowerCase().endsWith('.kml'))||'doc.kml';
+    return new TextDecoder().decode(files[kmlName]);
+  }
+  return new TextDecoder().decode(buf);
+}
+function parseKml(text){
+  const doc=new DOMParser().parseFromString(text,'application/xml');
+  const out=[];
+  const folders=Array.from(doc.getElementsByTagName('Folder'));
+  const scope = folders.length? folders : [doc];
+  for(const f of scope){
+    let layer='';
+    for(const ch of Array.from(f.childNodes)) if(ch.nodeName==='name'){ layer=ch.textContent.trim(); break; }
+    for(const pm of Array.from(f.getElementsByTagName('Placemark'))){
+      const nm=(pm.getElementsByTagName('name')[0]?.textContent||'').trim();
+      const coords=(pm.getElementsByTagName('coordinates')[0]?.textContent||'').trim();
+      if(!coords) continue;
+      const [lon,lat]=coords.split(',').map(Number);
+      if(Number.isFinite(lat)&&Number.isFinite(lon)) out.push({name:nm,lat,lon,layer});
+    }
+  }
+  return out;
+}
+
+(async function init(){
+  let enrich={};
+  try{ const e=await fetch(ENRICH_URL); if(e.ok){ enrich=(await e.json()).records||{}; } }
+  catch(_){ /* enrichment optional; buildings will show undetermined */ }
+  try{
+    const text=await loadKmlText();
+    const pins=parseKml(text);
+    if(!pins.length) throw new Error('no placemarks parsed');
+    const bounds=[];
+    for(const p of pins){
+      const type=typeFromFolder(p.layer);
+      const en=enrich[p.name]||null;
+      addPin(p.name,p.lat,p.lon,type,en);
+      bounds.push([p.lat,p.lon]);
+    }
+    bumpCounts();
+    if(bounds.length) map.fitBounds(bounds,{padding:[40,40]});
+    const enN=Object.keys(enrich).length;
+    setStatus(`Live: <b>${pins.length}</b> pins from Koen's map · <b>${enN}</b> enrichment records (manifests + verdicts). Click a pin.`);
+  }catch(err){
+    setStatus(`Could not load the live map (${esc(String(err.message||err))}).<br>The KML proxy may not be deployed yet, or Google's endpoint is unreachable. Try reloading, or append <code>?mid=…</code> for another public My Map.`);
+  }
+})();
+</script>
+</body>
+</html>
