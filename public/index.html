@@ -46,6 +46,10 @@
   .auth.c{background:#f7efd6;border:1px solid #e3d29a}.auth.c .vlabel{color:var(--amber)}
   .auth.u{background:#eef0f2;border:1px solid #d7dde2}.auth.u .vlabel{color:var(--grey)}
   .aibadge{display:block;margin:0 0 7px;padding:5px 8px;border-radius:6px;background:#fff3d6;border:1px dashed #d9a400;color:#8a5a00;font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
+  .prov{font-size:11px;color:#33414d;margin:1px 0 7px;font-family:var(--mono)}
+  .prov a{color:#33414d;text-decoration:underline}
+  .provnote{font-size:10px;color:#8a5a00;margin:-4px 0 7px;font-style:italic}
+  .msimg{max-width:100%;border-radius:6px;margin:4px 0;display:block;cursor:zoom-in;border:1px solid #d7dde2}
   .corpus{margin-top:6px;padding-top:6px;border-top:1px dashed var(--line2);font-size:10.5px;color:var(--mut)}
   .chip{display:inline-block;font-family:var(--mono);font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:1px 7px;color:var(--mut)}
   .btn{display:inline-block;margin:3px 4px 0 0;font-size:11.5px;font-weight:600;color:#fff;background:var(--ms);border:none;border-radius:6px;padding:6px 9px;cursor:pointer;text-decoration:none}
@@ -180,6 +184,12 @@ function popMs(name,en){
   const manifest = en&&en.manifest;
   const pdf = en&&en.pdf;
   const pdfBtn = pdf ? `<a class="btn" style="background:var(--warn)" href="${pdf}" target="_blank" rel="noopener">📄 Open PDF</a>` : '';
+  const origin = en&&en.origin, mdate = en&&en.date, psrc = en&&en.prov_source, pnote = en&&en.prov_note;
+  const provtxt = [origin, mdate].filter(Boolean).join(' · ');
+  const provline = (provtxt||psrc) ? `<div class="prov">${esc(provtxt)}${psrc?`${provtxt?' · ':''}<a href="${psrc}" target="_blank" rel="noopener">source ↗</a>`:''}</div>` : '';
+  const provnote = pnote ? `<div class="provnote">${esc(pnote)}</div>` : '';
+  const img = en&&en.image;
+  const imgBlock = img ? `<a href="${img}" target="_blank" rel="noopener"><img class="msimg" src="${img}" alt="${esc(name)}" loading="lazy"></a>` : '';
   const id='ms_'+Math.random().toString(36).slice(2,8);
   const links=`<div style="margin-top:8px;font-size:11px">
     <a href="https://iiif.biblissima.fr/en/search?q=${encodeURIComponent(name)}" target="_blank" rel="noopener">Biblissima</a> ·
@@ -195,7 +205,7 @@ function popMs(name,en){
   }
   return `<div class="pop"><h3>${esc(name)}</h3>
     <div class="meta">manuscript depiction${fol?(' · '+fol):''}</div>
-    ${pdfBtn}${body}${links}</div>`;
+    ${provline}${provnote}${imgBlock}${pdfBtn}${body}${links}</div>`;
 }
 function popArt(name){
   const q=encodeURIComponent(name);
