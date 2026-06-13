@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>merlon-lens · admin</title>
+<style>
+  :root{ --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; --ink:#1c2730; --mut:#5d6b76; --line:#d7dde2; --bg:#f4f6f7; --card:#fff; --accent:#2f6f6a; --warn:#d9a400; --red:#b3402f; --green:#2e7d52; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+  header{padding:10px 14px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:5}
+  header h1{font-size:14px;margin:0;font-weight:700;letter-spacing:.02em}
+  header .tag{font-family:var(--mono);font-size:10px;color:var(--mut);border:1px solid var(--line);padding:2px 6px;border-radius:5px}
+  header .sp{flex:1}
+  button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 11px;color:var(--ink)}
+  button.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+  button.danger{background:var(--red);border-color:var(--red);color:#fff}
+  button.ghost{background:transparent}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  input,select,textarea{font:inherit;width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;background:#fff;color:var(--ink)}
+  textarea{min-height:64px;resize:vertical;font-family:var(--mono);font-size:12.5px}
+  label{display:block;font-size:11px;color:var(--mut);font-family:var(--mono);text-transform:uppercase;letter-spacing:.04em;margin:9px 0 3px}
+  .wrap{display:flex;gap:0;height:calc(100vh - 41px)}
+  .list{width:42%;max-width:440px;border-right:1px solid var(--line);overflow:auto;background:#fafbfb}
+  .pane{flex:1;overflow:auto;padding:16px}
+  .ctl{padding:10px;border-bottom:1px solid var(--line);background:#fafbfb;position:sticky;top:0}
+  .filters{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .filters button{padding:4px 8px;font-size:11px;border-radius:20px}
+  .filters button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .row{padding:9px 11px;border-bottom:1px solid #eef1f2;cursor:pointer;display:flex;gap:8px;align-items:center}
+  .row:hover{background:#eef4f3}
+  .row.sel{background:#e4efed;box-shadow:inset 3px 0 0 var(--accent)}
+  .row .nm{flex:1;min-width:0}
+  .row .nm b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .nm span{font-size:10.5px;color:var(--mut)}
+  .chip{font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+  .c-ms{color:#2b5d8a;border-color:#bcd4e6}.c-bld{color:#6a5300;border-color:#e6d9a0}.c-art{color:#5a5a5a}
+  .c-ai{background:#fff3d6;border-color:#d9a400;color:#8a5a00}
+  .c-ok{background:#e6f4ec;border-color:#9fd3b4;color:#2e7d52}
+  .muted{color:var(--mut)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+  .card h2{font-size:14px;margin:0 0 2px}
+  .card .sub{font-size:11px;color:var(--mut);font-family:var(--mono);margin-bottom:6px}
+  .msg{padding:9px 11px;border-radius:7px;font-size:12.5px;margin:10px 0}
+  .msg.ok{background:#e6f4ec;color:#21603e}.msg.err{background:#fbe9e6;color:#8a2c20}
+  .imgprev{max-width:160px;border-radius:6px;border:1px solid var(--line);margin-top:6px;display:block}
+  .login{max-width:340px;margin:14vh auto;padding:22px;background:#fff;border:1px solid var(--line);border-radius:12px}
+  .login h2{margin:0 0 4px;font-size:16px}.login p{margin:0 0 14px;color:var(--mut);font-size:12.5px}
+  .hide{display:none}
+  .small{font-size:11px}
+  @media(max-width:720px){ .wrap{flex-direction:column;height:auto} .list{width:100%;max-width:none;max-height:42vh;border-right:none;border-bottom:1px solid var(--line)} }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login">
+    <h2>merlon-lens admin</h2>
+    <p>Enter the admin password.</p>
+    <input id="pw" type="password" placeholder="password" autocomplete="current-password">
+    <div id="loginerr" class="msg err hide"></div>
+    <button class="pri" id="unlock" style="width:100%;margin-top:10px">Unlock</button>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <h1>merlon-lens</h1><span class="tag">admin</span>
+    <span id="count" class="tag"></span>
+    <span class="sp"></span>
+    <button class="ghost small" id="reload">↻ reload</button>
+    <button class="ghost small" id="lock">lock</button>
+  </header>
+  <div class="wrap">
+    <div class="list">
+      <div class="ctl">
+        <input id="search" placeholder="search pins…">
+        <div class="filters" id="filters">
+          <button data-f="all" class="on">all</button>
+          <button data-f="ai">AI drafts</button>
+          <button data-f="ms-noimg">ms · no image/IIIF</button>
+          <button data-f="bld-undet">buildings · undetermined</button>
+        </div>
+      </div>
+      <div id="rows"></div>
+    </div>
+    <div class="pane" id="pane">
+      <p class="muted">Select a pin to edit.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+let PW = null, PINS = [], EN = {}, FILTER = 'all', Q = '', SEL = null;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => (s==null?'':String(s)).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function typeOf(folder){ const f=(folder||'').toLowerCase(); if(f.includes('non-manuscript')) return 'art'; if(f.includes('manuscript')) return 'ms'; return 'building'; }
+function guessType(name){ const e=(name.toLowerCase().match(/\.[a-z0-9]+$/)||[''])[0]; return {'.webp':'image/webp','.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.pdf':'application/pdf'}[e]||''; }
+
+async function api(action, extra){
+  const r = await fetch('/api/admin', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify(Object.assign({ password: PW, action }, extra||{})) });
+  let j={}; try{ j = await r.json(); }catch{ j = { error:'bad response' }; }
+  if (r.status === 401){ PW=null; show('login'); $('loginerr').textContent='Session expired — re-enter password.'; $('loginerr').classList.remove('hide'); throw new Error('401'); }
+  if (!r.ok && !j.error) j.error = 'HTTP '+r.status;
+  return j;
+}
+
+function show(which){ $('login').classList.toggle('hide', which!=='login'); $('app').classList.toggle('hide', which!=='app'); }
+
+async function doLogin(){
+  const pw = $('pw').value; if(!pw) return;
+  PW = pw;
+  try{
+    const r = await api('auth');
+    if(r.ok){ $('loginerr').classList.add('hide'); show('app'); await loadPins(); }
+    else { throw new Error(r.error||'auth failed'); }
+  }catch(e){ if(e.message!=='401'){ PW=null; $('loginerr').textContent = e.message; $('loginerr').classList.remove('hide'); } }
+}
+
+async function loadPins(){
+  $('rows').innerHTML = '<p class="muted" style="padding:12px">Loading…</p>';
+  try{
+    const [kmlR, enR] = await Promise.all([ fetch('/api/kml'), fetch('/api/enrichment') ]);
+    const kmlText = await kmlR.text();
+    const enJson = await enR.json();
+    EN = (enJson && enJson.records) || {};
+    const xml = new DOMParser().parseFromString(kmlText, 'application/xml');
+    const pms = [...xml.getElementsByTagName('Placemark')];
+    const seen = new Set(); PINS = [];
+    for (const pm of pms){
+      const nm = (pm.getElementsByTagName('name')[0]||{}).textContent || '';
+      const name = nm.trim(); if(!name || seen.has(name)) continue; seen.add(name);
+      let node = pm.parentNode, folder='';
+      while(node && node.tagName){ if(node.tagName==='Folder'){ folder=(node.getElementsByTagName('name')[0]||{}).textContent||''; break; } node=node.parentNode; }
+      PINS.push({ name, type: typeOf(folder) });
+    }
+    PINS.sort((a,b)=>a.name.localeCompare(b.name));
+    $('count').textContent = PINS.length + ' pins';
+    renderList();
+  }catch(e){ $('rows').innerHTML = '<p class="msg err" style="margin:12px">Could not load pins: '+esc(e.message)+'</p>'; }
+}
+
+function passesFilter(p){
+  const en = EN[p.name] || {};
+  if (Q && !p.name.toLowerCase().includes(Q)) return false;
+  if (FILTER==='ai') return en.provenance==='ai-draft';
+  if (FILTER==='ms-noimg') return p.type==='ms' && !en.manifest && !en.image && !en.pdf;
+  if (FILTER==='bld-undet'){ const v=(en.web&&en.web.verdict)||'UNDETERMINED'; return p.type==='building' && (!en.web || v==='UNDETERMINED'); }
+  return true;
+}
+
+function stateChips(p){
+  const en = EN[p.name] || {}; const out=[];
+  out.push(`<span class="chip c-${p.type==='building'?'bld':p.type}">${p.type}</span>`);
+  if (en.provenance==='ai-draft') out.push('<span class="chip c-ai">AI draft</span>');
+  if (p.type==='building' && en.web && en.web.verdict) out.push(`<span class="chip">${esc(en.web.verdict.replace('_OR_ADDED','').replace('_MEDIEVAL',''))}</span>`);
+  if (p.type==='ms'){ if(en.manifest) out.push('<span class="chip c-ok">IIIF</span>'); if(en.image) out.push('<span class="chip c-ok">img</span>'); if(en.pdf) out.push('<span class="chip c-ok">pdf</span>'); }
+  return out.join(' ');
+}
+
+function renderList(){
+  const rows = PINS.filter(passesFilter);
+  $('rows').innerHTML = rows.length ? rows.map(p => `
+    <div class="row ${SEL===p.name?'sel':''}" data-pin="${esc(p.name)}">
+      <div class="nm"><b>${esc(p.name)}</b><span>${stateChips(p)}</span></div>
+    </div>`).join('') : '<p class="muted" style="padding:12px">No pins match.</p>';
+  [...document.querySelectorAll('.row')].forEach(r => r.onclick = () => openEditor(r.dataset.pin));
+}
+
+function field(id, lbl, val, ph){ return `<label>${lbl}</label><input id="${id}" value="${esc(val||'')}" placeholder="${esc(ph||'')}">`; }
+
+function openEditor(pin){
+  SEL = pin; renderList();
+  const p = PINS.find(x=>x.name===pin) || { name:pin, type:'building' };
+  const en = EN[pin] || {};
+  let html = `<div class="card"><h2>${esc(pin)}</h2><div class="sub">${p.type}${en.provenance==='ai-draft'?' · ⚠ AI draft (unverified)':''}</div>`;
+
+  if (p.type==='ms'){
+    html += field('f_manifest','IIIF manifest URL', en.manifest, 'https://…/manifest.json');
+    html += field('f_origin','Origin', en.origin, 'e.g. Milan (Visconti court)');
+    html += field('f_date','Date', en.date, 'e.g. 1370–1380');
+    html += field('f_prov_source','Source URL', en.prov_source, 'catalogue record');
+    html += field('f_prov_note','Note', en.prov_note, 'caveats');
+    html += `<label>Image / PDF</label>`;
+    if (en.image) html += `<a href="${esc(en.image)}" target="_blank"><img class="imgprev" src="${esc(en.image)}"></a>`;
+    if (en.pdf) html += `<div class="small"><a href="${esc(en.pdf)}" target="_blank">current PDF ↗</a></div>`;
+    html += `<input id="f_file" type="file" accept="image/*,application/pdf" style="margin-top:6px">
+      <div id="upmsg" class="small muted" style="margin-top:4px"></div>`;
+    html += `<div style="margin-top:14px;display:flex;gap:8px"><button class="pri" id="save">Save fields</button></div>`;
+  } else { // building
+    const web = en.web || {}; const v = web.verdict || 'UNDETERMINED';
+    const opt = (val,txt)=>`<option value="${val}" ${v===val?'selected':''}>${txt}</option>`;
+    html += `<label>Verdict</label><select id="f_verdict">
+      ${opt('ORIGINAL_MEDIEVAL','Original medieval')}${opt('RESTORED_OR_ADDED','Restored / added')}${opt('CONTESTED','Contested')}${opt('UNDETERMINED','Undetermined')}</select>`;
+    html += `<label>Basis</label><textarea id="f_basis">${esc(web.basis||'')}</textarea>`;
+    html += field('f_scope','Scope', web.scope, 'e.g. keep / curtain / gate-towers');
+    const cf = web.confidence||'low';
+    html += `<label>Confidence</label><select id="f_conf">${['low','medium','high'].map(c=>`<option ${cf===c?'selected':''}>${c}</option>`).join('')}</select>`;
+    html += `<label>Sources (one URL per line)</label><textarea id="f_sources">${esc((web.sources||[]).join('\n'))}</textarea>`;
+    html += `<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="pri" id="save">Save verdict</button>`;
+    if (en.provenance==='ai-draft') html += `<button id="approve">Approve</button><button class="danger" id="reject">Reject (delete)</button>`;
+    html += `</div>`;
+  }
+  html += `<div id="result"></div></div>`;
+  $('pane').innerHTML = html;
+
+  if ($('save')) $('save').onclick = () => savePin(p);
+  if ($('approve')) $('approve').onclick = () => approve(p);
+  if ($('reject')) $('reject').onclick = () => reject(p);
+  if ($('f_file')) $('f_file').onchange = (e) => upload(p, e.target.files[0]);
+}
+
+function result(msg, ok){ const r=$('result'); if(r){ r.className='msg '+(ok?'ok':'err'); r.textContent=msg; } }
+
+async function savePin(p){
+  const btn=$('save'); btn.disabled=true; btn.textContent='Saving…';
+  try{
+    let set={}, unset=[];
+    if (p.type==='ms'){
+      for (const f of ['manifest','origin','date','prov_source','prov_note']){
+        const val=$('f_'+f).value.trim(); if(val) set[f]=val; else unset.push(f);
+      }
+    } else {
+      const sources = $('f_sources').value.split('\n').map(s=>s.trim()).filter(Boolean);
+      set.web = { verdict:$('f_verdict').value, basis:$('f_basis').value.trim(), scope:$('f_scope').value.trim(), confidence:$('f_conf').value, sources };
+    }
+    const r = await api('patch', { pin:p.name, type:p.type, set, unset });
+    if(r.ok){ EN[p.name]=Object.assign({type:p.type}, r.row.payload); result('Saved.', true); renderList(); }
+    else result(r.error||'save failed', false);
+  }catch(e){ if(e.message!=='401') result(e.message,false); }
+  finally{ btn.disabled=false; btn.textContent = p.type==='ms'?'Save fields':'Save verdict'; }
+}
+
+async function approve(p){
+  const b=$('approve'); b.disabled=true; b.textContent='…';
+  try{
+    const r = await api('patch', { pin:p.name, type:p.type, set:{ approved:true }, unset:['provenance'] });
+    if(r.ok){ EN[p.name]=Object.assign({type:p.type}, r.row.payload); result('Approved — badge cleared on the lens.', true); openEditor(p.name); }
+    else result(r.error||'approve failed', false);
+  }catch(e){ if(e.message!=='401') result(e.message,false); }
+}
+
+async function reject(p){
+  if(!confirm('Delete the enrichment for "'+p.name+'"? The pin falls back to undetermined.')) return;
+  try{
+    const r = await api('delete', { pin:p.name });
+    if(r.ok){ delete EN[p.name]; result('Deleted.', true); renderList(); openEditor(p.name); }
+    else result(r.error||'delete failed', false);
+  }catch(e){ if(e.message!=='401') result(e.message,false); }
+}
+
+async function upload(p, file){
+  if(!file) return;
+  const m=$('upmsg'); const ct = file.type || guessType(file.name);
+  if(!['image/webp','image/jpeg','image/png','application/pdf'].includes(ct)){ m.textContent='Unsupported type: '+(ct||'unknown'); m.className='small err'; return; }
+  m.textContent='Uploading…'; m.className='small muted';
+  try{
+    const s = await api('signed-upload', { pin:p.name, filename:file.name, contentType:ct });
+    if(!s.ok) throw new Error(s.error||'sign failed');
+    const put = await fetch(s.uploadUrl, { method:'PUT', headers:{ 'content-type':ct, 'x-upsert':'true' }, body:file });
+    if(!put.ok) throw new Error('upload failed ('+put.status+')');
+    const fieldName = ct.startsWith('image/') ? 'image' : 'pdf';
+    const r = await api('patch', { pin:p.name, type:p.type, set:{ [fieldName]: s.publicUrl } });
+    if(!r.ok) throw new Error(r.error||'attach failed');
+    EN[p.name]=Object.assign({type:p.type}, r.row.payload);
+    m.textContent = fieldName+' attached.'; m.className='small'; openEditor(p.name); renderList();
+  }catch(e){ if(e.message!=='401'){ m.textContent = e.message; m.className='small err'; } }
+}
+
+// wire up
+$('unlock').onclick = doLogin;
+$('pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+$('lock').onclick = () => { PW=null; show('login'); $('pw').value=''; };
+$('reload').onclick = loadPins;
+$('search').addEventListener('input', e => { Q=e.target.value.toLowerCase().trim(); renderList(); });
+[...document.querySelectorAll('#filters button')].forEach(b => b.onclick = () => {
+  FILTER=b.dataset.f; [...document.querySelectorAll('#filters button')].forEach(x=>x.classList.toggle('on', x===b)); renderList();
+});
+</script>
+</body>
+</html>
