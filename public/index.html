@@ -185,12 +185,14 @@ function popBuilding(name,en){
   const agree = en&&en.agreement ? `<span class="chip">${esc(en.agreement)}</span>` : '';
   const q=encodeURIComponent(name+' swallowtail merlons crenellation');
   const ai = (en&&en.provenance==='ai-draft') ? '<div class="aibadge">⚠ AI-generated · unverified draft</div>' : '';
+  const research = (en&&Array.isArray(en.research)?en.research:[]).map(r=>{const t=esc(r.title||'thread'),tip=esc(r.snippet||'');return r.url?`<a href="${esc(safeUrl(r.url))}" target="_blank" rel="noopener" title="${tip}">${t} ↗</a>`:`<span title="${tip}">${t}</span>`;}).join(' · ');
   return `<div class="pop"><h3>${esc(name)}</h3>
     ${ai}<div class="auth ${cls}">
       <span class="vlabel">${(VLABEL[v]||VLABEL.UNDETERMINED)[1]}</span>${web.confidence?`<span class="vconf">${esc(web.confidence)}</span>`:''} ${agree}
       <div class="vbasis">${esc(basis)}</div>
       ${web.scope?`<div class="vmeta">scope: ${esc(web.scope)}</div>`:''}
       ${src?`<div class="vmeta">source: ${src}</div>`:''}
+      ${research?`<div class="vmeta">Voynich forum: ${research}</div>`:''}
       ${corpus}
     </div>
     <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">↗ image search (verify merlons)</a></div>`;
