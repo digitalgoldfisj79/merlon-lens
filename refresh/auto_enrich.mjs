@@ -61,7 +61,9 @@ function parseKml(kml) {
     for (const pm of chunk.split('<Placemark>').slice(1)) {
       const name = norm((pm.match(/<name>([\s\S]*?)<\/name>/) || [])[1] || '');
       const desc = norm((pm.match(/<description>([\s\S]*?)<\/description>/) || [])[1] || '');
-      if (name) out.push({ name, folder, desc });
+      const cm = pm.match(/<coordinates>\s*([-\d.]+),([-\d.]+)/);
+      const lng = cm ? +cm[1] : null, lat = cm ? +cm[2] : null;
+      if (name) out.push({ name, folder, desc, lat, lng });
     }
   }
   return out;
@@ -127,6 +129,40 @@ async function researchFor(name) {
     for (const p of top) { const m = await sourceMeta(p.source_id); out.push({ title: m.title, url: m.url, type: m.type, similarity: Math.round((p.similarity || 0) * 100) / 100, text: (p.text || '').replace(/\s+/g, ' ').slice(0, 300) }); }
     return out;
   } catch { return []; }
+}
+
+// ---- representative building photo via Wikidata P18, verified by coordinates ----
+const WIKI_UA = 'merlon-lens/1.0 (https://github.com/digitalgoldfisj79/merlon-lens; swallowtail-merlon research map)';
+const _hav = (a, b, c, d) => { const R = 6371, r = x => x * Math.PI / 180, dLat = r(c - a), dLng = r(d - b); const s = Math.sin(dLat / 2) ** 2 + Math.cos(r(a)) * Math.cos(r(c)) * Math.sin(dLng / 2) ** 2; return R * 2 * Math.asin(Math.sqrt(s)); };
+const _sleep = ms => new Promise(r => setTimeout(r, ms));
+function cleanPlaceName(name) {
+  const b = String(name).trim();
+  return [...new Set([b, b.split('/')[0].trim(), b.split(/\s[-–]\s/)[0].trim(), b.replace(/\([^)]*\)/g, '').trim()])].filter(Boolean);
+}
+const COMMONS_IMG = (f, w) => `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(f)}?width=${w}`;
+const COMMONS_PAGE = f => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(f.replace(/ /g, '_'))}`;
+async function _wjson(u) { const r = await fetch(u, { headers: { 'user-agent': WIKI_UA, accept: 'application/json' } }); if (!r.ok) throw new Error('wd ' + r.status); return r.json(); }
+// Returns {url, thumb, page, source, title, dist} or null. Only returns a match whose Wikidata coordinates are within maxKm of the pin.
+async function wikiImage(name, lat, lng, maxKm = 4) {
+  if (!(lat && lng)) return null;
+  for (const q of cleanPlaceName(name)) {
+    try {
+      const s = await _wjson(`https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(q)}&language=en&type=item&limit=5&format=json&origin=*`);
+      const ids = (s.search || []).map(x => x.id); if (!ids.length) { await _sleep(150); continue; }
+      const e = await _wjson(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ids.join('|')}&props=claims|labels&languages=en&format=json&origin=*`);
+      let best = null;
+      for (const id of ids) {
+        const cl = e.entities?.[id]?.claims; if (!cl) continue;
+        const coord = cl.P625?.[0]?.mainsnak?.datavalue?.value, file = cl.P18?.[0]?.mainsnak?.datavalue?.value;
+        if (!coord || !file) continue;
+        const dist = _hav(lat, lng, coord.latitude, coord.longitude);
+        if (dist <= maxKm && (!best || dist < best.dist)) best = { dist, file, label: e.entities[id].labels?.en?.value || q };
+      }
+      await _sleep(180);
+      if (best) return { url: COMMONS_IMG(best.file, 1200), thumb: COMMONS_IMG(best.file, 360), page: COMMONS_PAGE(best.file), source: 'wikimedia', title: best.label, dist: Math.round(best.dist * 100) / 100 };
+    } catch { await _sleep(220); }
+  }
+  return null;
 }
 
 // Convert common IIIF viewer URLs to manifest URLs (same heuristics as the client).
@@ -257,11 +293,15 @@ for (const p of B) {
   try {
     const research = await researchFor(p.name);
     const web = await draftVerdict(p, research);
+    const photo = await wikiImage(p.name, p.lat, p.lng);
     const grounded = web.sources.length > 0 && web.verdict !== 'UNDETERMINED';
     const researchStore = research.map(r => ({ title: r.title, url: r.url, type: r.type, similarity: r.similarity, snippet: (r.text || '').slice(0, 160) }));
-    const payload = { ...p.base, web, ...(researchStore.length ? { research: researchStore } : {}), agreement: 'WEB_ONLY', provenance: 'ai-draft', approved: false, ai_last_try: now() };
+    const payload = { ...p.base, web,
+      ...(researchStore.length ? { research: researchStore } : {}),
+      ...(photo ? { photo } : {}),
+      agreement: 'WEB_ONLY', provenance: 'ai-draft', approved: false, ai_last_try: now() };
     rows.push({ pin: p.name, type: 'building', payload, updated_at: now() });
-    console.log(`  [building] ${p.name} -> ${web.verdict} [${web.confidence}] (${web.sources.length} web cites, ${research.length} research refs)${grounded ? '  ✓ upgrade' : ''}`);
+    console.log(`  [building] ${p.name} -> ${web.verdict} [${web.confidence}] (${web.sources.length} web, ${research.length} corpus refs${photo ? ', photo ' + photo.dist + 'km' : ''})${grounded ? '  ✓' : ''}`);
   } catch (e) { console.error(`  [building] FAILED ${p.name}: ${e.message}`); }
 }
 
