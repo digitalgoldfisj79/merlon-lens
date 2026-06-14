@@ -1,7 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
+  "rewrites": [
+    { "source": "/api/admin", "destination": "/api/admin/admin" }
+  ],
   "headers": [
-    { "source": "/api/(.*)", "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }] }
+    { "source": "/api/kml", "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }] },
+    { "source": "/api/enrichment", "headers": [{ "key": "Access-Control-Allow-Origin", "value": "*" }] }
   ]
 }
