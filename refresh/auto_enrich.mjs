@@ -105,18 +105,16 @@ async function verifyManifest(url) {
 }
 
 // ---- OpenRouter (web-grounded, strict JSON) ----
-async function orChat(messages) {
+async function orChat(messages, useTools = true) {
+  const body = { model: MODEL, messages, temperature: 0, response_format: { type: 'json_object' } };
+  if (useTools) body.tools = [{ type: 'openrouter:web_search', parameters: { max_results: 5, max_total_results: 15 } }];
   const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${OR_KEY}`, 'Content-Type': 'application/json',
       'HTTP-Referer': 'https://merlon-lens.vercel.app', 'X-Title': 'merlon-lens enrichment',
     },
-    body: JSON.stringify({
-      model: MODEL, messages,
-      tools: [{ type: 'openrouter:web_search', parameters: { max_results: 5, max_total_results: 15 } }],
-      temperature: 0, response_format: { type: 'json_object' },
-    }),
+    body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`OpenRouter ${r.status}: ${(await r.text()).slice(0, 300)}`);
   const msg = (await r.json()).choices?.[0]?.message || {};
@@ -129,11 +127,23 @@ const VERDICT_SYS = `You are a cautious architectural-history researcher. Decide
 const MANIFEST_SYS = `You locate the IIIF manifest for a specific medieval manuscript. Use web search on recognised digital libraries (Gallica/BnF, DigiVatLib, Bodleian, e-codices, Biblissima, British Library, Yale/Beinecke, Morgan, KBR, Berlin Staatsbibliothek, national libraries). Return STRICT JSON only: {"manifest_url":"<a direct IIIF manifest.json or info URL you actually saw on a page, else empty>","viewer_url":"<the IIIF viewer page URL if that is all you found, else empty>","library":"<host>","confidence":"low|medium|high","uncertain":"<doubts>"}. Never fabricate a URL; only return URLs from pages you actually retrieved. If unsure, leave both empty.`;
 
 async function draftVerdict(pin) {
-  const { content, citations } = await orChat([
-    { role: 'system', content: VERDICT_SYS },
-    { role: 'user', content: `Building: "${pin.name}". Map note: ${pin.desc || '(none)'}. Are its swallowtail merlons original medieval, or a later restoration/addition?` },
-  ]);
-  let web = parseLoose(content) || { verdict: 'UNDETERMINED', basis: 'AI returned unparseable output.', confidence: 'low', scope: 'whole site', uncertain: 'parse failure' };
+  const userMsg = `Building: "${pin.name}". Map note: ${pin.desc || '(none)'}. Are its swallowtail merlons original medieval, or a later restoration/addition?`;
+  const first = await orChat([{ role: 'system', content: VERDICT_SYS }, { role: 'user', content: userMsg }]);
+  let web = parseLoose(first.content);
+  if (!web) {
+    // Web-grounded reply wasn't clean JSON (the failure mode we saw). Ask once more, no tools, to reformat.
+    try {
+      const fix = await orChat([
+        { role: 'system', content: VERDICT_SYS },
+        { role: 'user', content: userMsg },
+        { role: 'assistant', content: first.content || '(no output)' },
+        { role: 'user', content: 'Output ONLY the JSON object specified above — no prose, no markdown, no code fences.' },
+      ], false);
+      web = parseLoose(fix.content);
+    } catch {}
+  }
+  if (!web) web = { verdict: 'UNDETERMINED', basis: 'No reliable source found online for the merlons specifically.', confidence: 'low', scope: 'whole site', uncertain: 'model did not return a parseable verdict' };
+  const citations = first.citations;
   if (!citations.length) { web.verdict = 'UNDETERMINED'; web.basis = `${web.basis || ''} [no web citations — not grounded]`.trim(); web.confidence = 'low'; }
   web.sources = citations;
   return web;
