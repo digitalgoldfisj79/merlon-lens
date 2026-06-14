@@ -1,4 +1,5 @@
-// api/admin.js — password-gated write/upload proxy for the merlon-lens admin page.
+// api/admin/admin.js — password-gated write/upload proxy for the merlon-lens admin page.
+// Deployed at route /api/admin (see the rewrite in vercel.json).
 // The browser never sees a Supabase key. This function holds the service key and a
 // shared password (both as env vars) and is the ONLY writer to merlon_enrichment + Storage.
 //
@@ -12,6 +13,11 @@
 //   patch  {pin, set?, unset?, type?} -> merge/remove payload keys (create row if absent)
 //   delete {pin}                 -> remove the pin's row
 //   signed-upload {pin, filename, contentType} -> {uploadUrl, publicUrl}  (browser PUTs the file to uploadUrl)
+
+import { timingSafeEqual } from 'node:crypto';
+
+// Constant-time password check (avoids leaking length/prefix via timing).
+const pwEqual = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && timingSafeEqual(x, y); };
 
 const SB_URL = process.env.SUPABASE_URL || 'https://ymaqlcfjmdwncdbjprmw.supabase.co';
 const SB_KEY = process.env.SUPABASE_SERVICE_KEY;
@@ -39,7 +45,7 @@ export default async function handler(req, res) {
   if (!SB_KEY || !PW) return res.status(500).json({ error: 'Server not configured: set SUPABASE_SERVICE_KEY and ADMIN_PASSWORD in Vercel.' });
 
   const body = await readBody(req);
-  if (typeof body.password !== 'string' || body.password !== PW) return res.status(401).json({ error: 'Bad password' });
+  if (typeof body.password !== 'string' || !pwEqual(body.password, PW)) return res.status(401).json({ error: 'Bad password' });
 
   const action = body.action;
   try {
