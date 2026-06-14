@@ -106,6 +106,8 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
   {subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap, © CARTO · pins © Koen Gheuens'}).addTo(map);
 
 const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Only allow http(s) URLs into href/src; anything else (javascript:, data:, malformed) becomes '#'.
+const safeUrl = u => { try { const x=new URL(u, location.href); return (x.protocol==='http:'||x.protocol==='https:')?x.href:'#'; } catch { return '#'; } };
 const counts = {o:0,r:0,c:0,u:0,ms:0,art:0};
 function setStatus(h){ document.getElementById('status').innerHTML = h; }
 function bumpCounts(){ for(const k in counts){ const el=document.getElementById('c-'+k); if(el) el.textContent=counts[k]; } }
@@ -148,6 +150,8 @@ let osd=null;
 async function openIIIF(manifestUrl,title){
   const wrap=document.getElementById('osd-wrap'); document.getElementById('osd-title').textContent=title||'IIIF';
   wrap.style.display='flex';
+  manifestUrl = safeUrl(manifestUrl);
+  if(manifestUrl==='#'){ document.getElementById('osd-title').textContent=(title||'')+' — invalid manifest URL'; return; }
   try{
     const tiles=await manifestToTileSources(manifestUrl);
     if(!tiles.length){ document.getElementById('osd-title').textContent=(title||'')+' — no images found in manifest'; return; }
@@ -157,6 +161,11 @@ async function openIIIF(manifestUrl,title){
   }catch(e){ document.getElementById('osd-title').textContent=(title||'')+' — failed to load manifest'; }
 }
 function closeOSD(){ const w=document.getElementById('osd-wrap'); w.style.display='none'; if(osd){osd.destroy();osd=null;} }
+document.addEventListener('click', e => {
+  const a = e.target.closest && e.target.closest('a.openiiif'); if(!a) return;
+  e.preventDefault();
+  openIIIF(a.getAttribute('data-manifest'), a.getAttribute('data-title') || 'IIIF');
+});
 
 // ---------- popups ----------
 function folioOf(name){ const m=(name||'').match(/\bf?\s?(\d{1,3})\s?([rv])\b/i); return m?('f'+m[1]+m[2].toLowerCase()):null; }
@@ -164,7 +173,7 @@ function folioOf(name){ const m=(name||'').match(/\bf?\s?(\d{1,3})\s?([rv])\b/i)
 function popBuilding(name,en){
   const web=(en&&en.web)||{}; const v=web.verdict||'UNDETERMINED'; const cls=(VLABEL[v]||VLABEL.UNDETERMINED)[0];
   const basis = web.basis || 'No reliable source found online — evidence for these is usually Italian/German print. Treat present merlons with caution; many in this corpus are 19th–20th-c. reconstructions.';
-  const src = (web.sources||[]).map((u,i)=>`<a href="${u}" target="_blank" rel="noopener">${(web.sources.length>1)?('['+(i+1)+']'):'link'} ↗</a>`).join(' · ');
+  const src = (web.sources||[]).map((u,i)=>`<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${(web.sources.length>1)?('['+(i+1)+']'):'link'} ↗</a>`).join(' · ');
   const corpus = en&&en.corpus ? `<div class="corpus"><b>corpus:</b> ${esc(en.corpus.verdict)} — ${esc(en.corpus.source)}</div>` : '';
   const agree = en&&en.agreement ? `<span class="chip">${esc(en.agreement)}</span>` : '';
   const q=encodeURIComponent(name+' swallowtail merlons crenellation');
@@ -183,13 +192,13 @@ function popMs(name,en){
   const fol=folioOf(name); const status=en&&en.manifest_status;
   const manifest = en&&en.manifest;
   const pdf = en&&en.pdf;
-  const pdfBtn = pdf ? `<a class="btn" style="background:var(--warn)" href="${pdf}" target="_blank" rel="noopener">📄 Open PDF</a>` : '';
+  const pdfBtn = pdf ? `<a class="btn" style="background:var(--warn)" href="${esc(safeUrl(pdf))}" target="_blank" rel="noopener">📄 Open PDF</a>` : '';
   const origin = en&&en.origin, mdate = en&&en.date, psrc = en&&en.prov_source, pnote = en&&en.prov_note;
   const provtxt = [origin, mdate].filter(Boolean).join(' · ');
-  const provline = (provtxt||psrc) ? `<div class="prov">${esc(provtxt)}${psrc?`${provtxt?' · ':''}<a href="${psrc}" target="_blank" rel="noopener">source ↗</a>`:''}</div>` : '';
+  const provline = (provtxt||psrc) ? `<div class="prov">${esc(provtxt)}${psrc?`${provtxt?' · ':''}<a href="${esc(safeUrl(psrc))}" target="_blank" rel="noopener">source ↗</a>`:''}</div>` : '';
   const provnote = pnote ? `<div class="provnote">${esc(pnote)}</div>` : '';
   const img = en&&en.image;
-  const imgBlock = img ? `<a href="${img}" target="_blank" rel="noopener"><img class="msimg" src="${img}" alt="${esc(name)}" loading="lazy"></a>` : '';
+  const imgBlock = img ? `<a href="${esc(safeUrl(img))}" target="_blank" rel="noopener"><img class="msimg" src="${esc(safeUrl(img))}" alt="${esc(name)}" loading="lazy"></a>` : '';
   const id='ms_'+Math.random().toString(36).slice(2,8);
   const links=`<div style="margin-top:8px;font-size:11px">
     <a href="https://iiif.biblissima.fr/en/search?q=${encodeURIComponent(name)}" target="_blank" rel="noopener">Biblissima</a> ·
@@ -197,8 +206,8 @@ function popMs(name,en){
     <a href="https://www.google.com/search?q=${encodeURIComponent(name+' IIIF manifest')}" target="_blank" rel="noopener">Web</a></div>`;
   let body;
   if(manifest){
-    body=`<a class="btn" href="#" onclick="openIIIF('${manifest}','${esc(name).replace(/'/g,'')}');return false;">Open IIIF viewer</a>
-      <div style="margin-top:5px;font-size:10.5px"><a href="${manifest}" target="_blank" rel="noopener">manifest.json ↗</a></div>`;
+    body=`<a class="btn openiiif" href="#" data-manifest="${esc(safeUrl(manifest))}" data-title="${esc(name)}">Open IIIF viewer</a>
+      <div style="margin-top:5px;font-size:10.5px"><a href="${esc(safeUrl(manifest))}" target="_blank" rel="noopener">manifest.json ↗</a></div>`;
   } else {
     body=`<div style="font-size:11.5px;color:var(--mut)">${esc(status||'No public IIIF manifest found.')}</div>
       ${pdf?'':'<input class="ipaste" placeholder="paste a viewer/manifest URL → open" onkeydown="if(event.key===\'Enter\'){var u=normalizeManifest(this.value);if(u)openIIIF(u,\''+esc(name).replace(/'/g,'')+'\');}">'}`;
