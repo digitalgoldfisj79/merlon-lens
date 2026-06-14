@@ -41,6 +41,7 @@
   .pop .meta{font-family:var(--mono);font-size:9.5px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
   .pop a{color:var(--art)}
   .ms-glyph{width:18px;height:18px;border-radius:3px;background:var(--ms);color:#fff;font:600 11px/18px var(--mono);text-align:center}
+  .ms-glyph.ai{outline:2px dashed #d9a400;outline-offset:1px;opacity:.8}
   .art-glyph{width:12px;height:12px;background:var(--art);transform:rotate(45deg);border:1px solid #fff}
   .auth{margin:6px 0 9px;padding:7px 9px;border-radius:7px;font-size:11.5px;line-height:1.4}
   .auth .vlabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:700}
@@ -218,8 +219,9 @@ function popMs(name,en){
     body=`<div style="font-size:11.5px;color:var(--mut)">${esc(status||'No public IIIF manifest found.')}</div>
       ${pdf?'':'<input class="ipaste" placeholder="paste a viewer/manifest URL → open" onkeydown="if(event.key===\'Enter\'){var u=normalizeManifest(this.value);if(u)openIIIF(u,\''+esc(name).replace(/'/g,'')+'\');}">'}`;
   }
+  const ai = (en&&en.provenance==='ai-draft') ? '<div class="aibadge">⚠ AI-suggested · unverified</div>' : '';
   return `<div class="pop"><h3>${esc(name)}</h3>
-    <div class="meta">manuscript depiction${fol?(' · '+fol):''}</div>
+    ${ai}<div class="meta">manuscript depiction${fol?(' · '+fol):''}</div>
     ${provline}${provnote}${imgBlock}${pdfBtn}${body}${links}</div>`;
 }
 function popArt(name){
@@ -238,7 +240,7 @@ function addPin(name,lat,lon,type,en){
   let marker, cat;
   if(type==='ms'){
     cat='ms'; counts.ms++;
-    marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="ms-glyph">M</div>',iconSize:[18,18],iconAnchor:[9,9]})});
+    marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:`<div class="ms-glyph${isAI?' ai':''}">M</div>`,iconSize:[18,18],iconAnchor:[9,9]})});
     marker.bindPopup(()=>popMs(name,en),{maxWidth:300});
   }else if(type==='art'){
     cat='art'; counts.art++;
