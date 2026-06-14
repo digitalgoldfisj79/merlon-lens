@@ -77,6 +77,58 @@ function parseLoose(s) {
   return null;
 }
 
+// ---- research MCP (the user's Voynich corpus, queried over MCP / JSON-RPC) ----
+const RESEARCH_MCP = process.env.RESEARCH_MCP || 'https://project-ggqu9.vercel.app/mcp';
+let MCP_SID = '', mcpReady = false;
+async function mcpRpc(method, params) {
+  const h = { 'content-type': 'application/json', 'accept': 'application/json, text/event-stream' };
+  if (MCP_SID) h['mcp-session-id'] = MCP_SID;
+  const r = await fetch(RESEARCH_MCP, { method: 'POST', headers: h, body: JSON.stringify({ jsonrpc: '2.0', id: Math.floor(Math.random() * 1e6), method, params }) });
+  if (!MCP_SID && r.headers.get('mcp-session-id')) MCP_SID = r.headers.get('mcp-session-id');
+  const ct = r.headers.get('content-type') || '', txt = await r.text();
+  if (ct.includes('event-stream')) { const d = txt.split('\n').filter(l => l.startsWith('data:')).map(l => l.slice(5).trim()).join(''); try { return JSON.parse(d); } catch { return null; } }
+  try { return JSON.parse(txt); } catch { return null; }
+}
+async function mcpInit() {
+  try {
+    const init = await mcpRpc('initialize', { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'merlon-lens', version: '2' } });
+    if (!init?.result) return false;
+    await fetch(RESEARCH_MCP, { method: 'POST', headers: { 'content-type': 'application/json', 'accept': 'application/json, text/event-stream', 'mcp-session-id': MCP_SID }, body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) });
+    mcpReady = true; return true;
+  } catch { return false; }
+}
+function passagesFrom(res) {
+  const sc = res?.result?.structuredContent?.result;
+  if (Array.isArray(sc)) return sc;
+  const c = res?.result?.content, out = [];
+  if (Array.isArray(c)) for (const it of c) { try { const p = JSON.parse(it.text); if (p?.source_id) out.push(p); } catch {} }
+  return out;
+}
+const urlCache = new Map();
+async function sourceMeta(sid) {
+  if (urlCache.has(sid)) return urlCache.get(sid);
+  let m = { title: sid, url: null, type: null };
+  try { const s = await mcpRpc('tools/call', { name: 'source_status', arguments: { source_id: sid } }); const t = s?.result?.content?.[0]?.text; if (t) { const j = JSON.parse(t); m = { title: j.title || sid, url: j.source_url || j.url || null, type: j.source_type || null }; } } catch {}
+  urlCache.set(sid, m); return m;
+}
+const GENERIC = new Set(['castle', 'tower', 'porta', 'della', 'castello', 'torre', 'fortress', 'abbey', 'gate', 'walls', 'wall', 'remnants', 'century', 'former', 'monastery', 'holy', 'saint', 'john']);
+// Returns building-SPECIFIC refs only (the building is actually named in the passage); [] if none / MCP down.
+async function researchFor(name) {
+  if (!mcpReady) return [];
+  try {
+    const ps = passagesFrom(await mcpRpc('tools/call', { name: 'search_sources', arguments: { query: name, max_results: 5 } }))
+      .filter(p => p && p.source_id && (p.similarity || 0) >= 0.80);
+    const tok = (name.match(/[A-Za-z]{4,}/g) || []).map(s => s.toLowerCase()).filter(s => !GENERIC.has(s));
+    const named = p => { const t = (p.text || '').toLowerCase(); return tok.some(k => t.includes(k)); };
+    const hits = ps.filter(named).sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+    const seen = new Set(), top = [];
+    for (const p of hits) { if (seen.has(p.source_id)) continue; seen.add(p.source_id); top.push(p); if (top.length >= 3) break; }
+    const out = [];
+    for (const p of top) { const m = await sourceMeta(p.source_id); out.push({ title: m.title, url: m.url, type: m.type, similarity: Math.round((p.similarity || 0) * 100) / 100, text: (p.text || '').replace(/\s+/g, ' ').slice(0, 300) }); }
+    return out;
+  } catch { return []; }
+}
+
 // Convert common IIIF viewer URLs to manifest URLs (same heuristics as the client).
 function normalizeManifest(u) {
   u = (u || '').trim(); if (!u) return null; let m;
@@ -122,12 +174,15 @@ async function orChat(messages, useTools = true) {
   return { content: msg.content || '', citations: [...new Set(citations)] };
 }
 
-const VERDICT_SYS = `You are a cautious architectural-history researcher. Decide whether a building's swallowtail (Ghibelline) merlons are original medieval fabric or a later (usually 19th-20th-century) restoration or addition. Use web search to find the building's restoration history from reliable sources (official site, museum, heritage authority, scholarship). Base every claim only on pages you actually retrieved; never invent a date or a source; if you cannot find a reliable statement about the merlons specifically, return verdict "UNDETERMINED" with empty sources. Respond with STRICT JSON only: {"verdict":"ORIGINAL_MEDIEVAL|RESTORED_OR_ADDED|CONTESTED|UNDETERMINED","basis":"1-2 plain sentences on what the sources show","confidence":"low|medium|high","scope":"which part, e.g. keep / curtain / gate-towers","uncertain":"what you remain unsure about"}`;
+const VERDICT_SYS = `You are a cautious architectural-history researcher. Decide whether a building's swallowtail (Ghibelline) merlons are original medieval fabric or a later (usually 19th-20th-century) restoration or addition. Use web search to find the building's restoration history from reliable sources (official site, museum, heritage authority, scholarship). Base every claim only on pages you actually retrieved; never invent a date or a source; if you cannot find a reliable statement about the merlons specifically, return verdict "UNDETERMINED" with empty sources. You may also receive community research notes (Voynich-forum / scholarship) mentioning the building; treat them as leads, weigh them against sources you actually retrieve, and note any conflict — but your cited sources must be pages you retrieved. Respond with STRICT JSON only: {"verdict":"ORIGINAL_MEDIEVAL|RESTORED_OR_ADDED|CONTESTED|UNDETERMINED","basis":"1-2 plain sentences on what the sources show","confidence":"low|medium|high","scope":"which part, e.g. keep / curtain / gate-towers","uncertain":"what you remain unsure about"}`;
 
 const MANIFEST_SYS = `You locate the IIIF manifest for a specific medieval manuscript. Use web search on recognised digital libraries (Gallica/BnF, DigiVatLib, Bodleian, e-codices, Biblissima, British Library, Yale/Beinecke, Morgan, KBR, Berlin Staatsbibliothek, national libraries). Return STRICT JSON only: {"manifest_url":"<a direct IIIF manifest.json or info URL you actually saw on a page, else empty>","viewer_url":"<the IIIF viewer page URL if that is all you found, else empty>","library":"<host>","confidence":"low|medium|high","uncertain":"<doubts>"}. Never fabricate a URL; only return URLs from pages you actually retrieved. If unsure, leave both empty.`;
 
-async function draftVerdict(pin) {
-  const userMsg = `Building: "${pin.name}". Map note: ${pin.desc || '(none)'}. Are its swallowtail merlons original medieval, or a later restoration/addition?`;
+async function draftVerdict(pin, research = []) {
+  const notes = research.length
+    ? `\n\nCommunity research notes (Voynich-forum / scholarship) mentioning "${pin.name}":\n` + research.map((r, i) => `(${i + 1}) ${r.title}: ${r.text}`).join('\n')
+    : '';
+  const userMsg = `Building: "${pin.name}". Map note: ${pin.desc || '(none)'}. Are its swallowtail merlons original medieval, or a later restoration/addition?${notes}`;
   const first = await orChat([{ role: 'system', content: VERDICT_SYS }, { role: 'user', content: userMsg }]);
   let web = parseLoose(first.content);
   if (!web) {
@@ -195,14 +250,18 @@ if (!B.length && !M.length) { console.log('Nothing to do. Done.'); process.exit(
 
 const now = () => new Date().toISOString();
 const rows = [];
+const mcpOk = await mcpInit();
+console.log(`Research MCP: ${mcpOk ? 'connected (' + RESEARCH_MCP + ')' : 'unavailable — verdicts will be web-only'}`);
 
 for (const p of B) {
   try {
-    const web = await draftVerdict(p);
+    const research = await researchFor(p.name);
+    const web = await draftVerdict(p, research);
     const grounded = web.sources.length > 0 && web.verdict !== 'UNDETERMINED';
-    const payload = { ...p.base, web, agreement: 'WEB_ONLY', provenance: 'ai-draft', approved: false, ai_last_try: now() };
+    const researchStore = research.map(r => ({ title: r.title, url: r.url, type: r.type, similarity: r.similarity, snippet: (r.text || '').slice(0, 160) }));
+    const payload = { ...p.base, web, ...(researchStore.length ? { research: researchStore } : {}), agreement: 'WEB_ONLY', provenance: 'ai-draft', approved: false, ai_last_try: now() };
     rows.push({ pin: p.name, type: 'building', payload, updated_at: now() });
-    console.log(`  [building] ${p.name} -> ${web.verdict} [${web.confidence}] (${web.sources.length} cites)${grounded ? '  ✓ upgrade' : '  (still undetermined)'}`);
+    console.log(`  [building] ${p.name} -> ${web.verdict} [${web.confidence}] (${web.sources.length} web cites, ${research.length} research refs)${grounded ? '  ✓ upgrade' : ''}`);
   } catch (e) { console.error(`  [building] FAILED ${p.name}: ${e.message}`); }
 }
 
