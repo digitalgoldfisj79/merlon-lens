@@ -27,6 +27,12 @@
   .row{display:flex;align-items:center;gap:9px;margin:6px 0;font-size:12.5px}
   .sw{width:12px;height:12px;flex:none;border:1px solid #0003}.sw.c{border-radius:50%}.sw.d{transform:rotate(45deg)}
   .cnt{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--mut)}
+  .lyr{cursor:pointer;-webkit-tap-highlight-color:transparent;border-radius:6px;padding:3px 5px;margin:3px -5px;transition:opacity .12s,background .12s}
+  .lyr:active{background:var(--panel2)}
+  .lyr.off{opacity:.4}
+  .lyr.off .sw{background:transparent!important;border-color:#0004!important}
+  .hint{font-family:var(--sans);font-size:9px;letter-spacing:0;text-transform:none;color:var(--mut);font-weight:400}
+  .showall{float:right;font-family:var(--sans);font-size:10px;letter-spacing:0;text-transform:none;color:var(--art);text-decoration:none;display:none}
   #status{font-size:11.5px;color:var(--mut);line-height:1.5}
   #map{flex:1;height:100vh}
   .leaflet-popup-content-wrapper{background:var(--panel);border:1px solid var(--line2);border-radius:9px}
@@ -69,14 +75,14 @@
       <p>A read-only view of Koen Gheuens' <a href="https://www.google.com/maps/d/viewer?mid=1y1hxOfGDFhqo97deJVvFNi7ASspTlp9v" target="_blank" rel="noopener">“Swallowtail Merlons” map</a>, live from his pins, with IIIF manuscripts and a sourced merlon-authenticity verdict per building.</p>
     </div>
     <section>
-      <p class="lab">Layers</p>
-      <div class="row"><span class="sw c" style="background:var(--good)"></span>building — original medieval<span class="cnt" id="c-o">0</span></div>
-      <div class="row"><span class="sw c" style="background:var(--warn)"></span>building — restored / added<span class="cnt" id="c-r">0</span></div>
-      <div class="row"><span class="sw c" style="background:var(--amber)"></span>building — contested<span class="cnt" id="c-c">0</span></div>
-      <div class="row"><span class="sw c" style="background:var(--grey)"></span>building — undetermined<span class="cnt" id="c-u">0</span></div>
-      <div class="row" style="font-size:11px;color:var(--mut)"><span class="sw c" style="background:transparent;border:1px dashed #d9a400"></span>dashed = AI-drafted, unverified</div>
-      <div class="row"><span class="sw" style="background:var(--ms);border-radius:3px"></span>manuscript depiction (IIIF)<span class="cnt" id="c-ms">0</span></div>
-      <div class="row"><span class="sw d" style="background:var(--art)"></span>other art depiction<span class="cnt" id="c-art">0</span></div>
+      <p class="lab">Layers <span class="hint">tap to hide / show</span><a id="showall" href="#" class="showall">show all</a></p>
+      <div class="row lyr" data-k="o"><span class="sw c" style="background:var(--good)"></span>building — original medieval<span class="cnt" id="c-o">0</span></div>
+      <div class="row lyr" data-k="r"><span class="sw c" style="background:var(--warn)"></span>building — restored / added<span class="cnt" id="c-r">0</span></div>
+      <div class="row lyr" data-k="c"><span class="sw c" style="background:var(--amber)"></span>building — contested<span class="cnt" id="c-c">0</span></div>
+      <div class="row lyr" data-k="u"><span class="sw c" style="background:var(--grey)"></span>building — undetermined<span class="cnt" id="c-u">0</span></div>
+      <div class="row lyr" data-k="ai" style="font-size:11px;color:var(--mut)"><span class="sw c" style="background:transparent;border:1px dashed #d9a400"></span>dashed = AI-drafted, unverified<span class="cnt" id="c-ai">0</span></div>
+      <div class="row lyr" data-k="ms"><span class="sw" style="background:var(--ms);border-radius:3px"></span>manuscript depiction (IIIF)<span class="cnt" id="c-ms">0</span></div>
+      <div class="row lyr" data-k="art"><span class="sw d" style="background:var(--art)"></span>other art depiction<span class="cnt" id="c-art">0</span></div>
     </section>
     <section>
       <p class="lab">Status</p>
@@ -108,7 +114,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
 const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 // Only allow http(s) URLs into href/src; anything else (javascript:, data:, malformed) becomes '#'.
 const safeUrl = u => { try { const x=new URL(u, location.href); return (x.protocol==='http:'||x.protocol==='https:')?x.href:'#'; } catch { return '#'; } };
-const counts = {o:0,r:0,c:0,u:0,ms:0,art:0};
+const counts = {o:0,r:0,c:0,u:0,ms:0,art:0,ai:0};
 function setStatus(h){ document.getElementById('status').innerHTML = h; }
 function bumpCounts(){ for(const k in counts){ const el=document.getElementById('c-'+k); if(el) el.textContent=counts[k]; } }
 
@@ -222,28 +228,52 @@ function popArt(name){
     <a href="https://www.google.com/search?tbm=isch&q=${q}" target="_blank" rel="noopener">↗ image search</a></div>`;
 }
 
-// ---------- marker creation ----------
+// ---------- marker creation + layer visibility ----------
+const allPins = [];                                   // {marker, cat, isAI}
+const vis = {o:true,r:true,c:true,u:true,ms:true,art:true,ai:true};
+
 function addPin(name,lat,lon,type,en){
-  let marker;
+  const isAI = !!(en && en.provenance==='ai-draft');
+  if(isAI) counts.ai++;
+  let marker, cat;
   if(type==='ms'){
-    counts.ms++;
+    cat='ms'; counts.ms++;
     marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="ms-glyph">M</div>',iconSize:[18,18],iconAnchor:[9,9]})});
     marker.bindPopup(()=>popMs(name,en),{maxWidth:300});
   }else if(type==='art'){
-    counts.art++;
+    cat='art'; counts.art++;
     marker=L.marker([lat,lon],{icon:L.divIcon({className:'',html:'<div class="art-glyph"></div>',iconSize:[12,12],iconAnchor:[6,6]})});
     marker.bindPopup(()=>popArt(name),{maxWidth:280});
   }else{ // building
     const v=(en&&en.web&&en.web.verdict)||'UNDETERMINED';
     const col={RESTORED_OR_ADDED:'var(--warn)',ORIGINAL_MEDIEVAL:'var(--good)',CONTESTED:'var(--amber)',UNDETERMINED:'var(--grey)'}[v];
-    counts[{RESTORED_OR_ADDED:'r',ORIGINAL_MEDIEVAL:'o',CONTESTED:'c',UNDETERMINED:'u'}[v]]++;
-    const aiDraft = en&&en.provenance==='ai-draft';
-    marker=L.circleMarker([lat,lon],{radius:6,color:col,fillColor:col,fillOpacity:aiDraft?0.32:0.82,weight:1.5,opacity:1,dashArray:aiDraft?'3 3':null});
+    cat={RESTORED_OR_ADDED:'r',ORIGINAL_MEDIEVAL:'o',CONTESTED:'c',UNDETERMINED:'u'}[v];
+    counts[cat]++;
+    marker=L.circleMarker([lat,lon],{radius:6,color:col,fillColor:col,fillOpacity:isAI?0.32:0.82,weight:1.5,opacity:1,dashArray:isAI?'3 3':null});
     marker.bindPopup(()=>popBuilding(name,en),{maxWidth:300});
   }
   marker.addTo(map);
+  allPins.push({marker,cat,isAI});
   return marker;
 }
+
+// A pin shows when its category is on AND (it isn't AI-drafted, or the AI layer is on).
+function applyVis(){
+  for(const p of allPins){
+    const show = vis[p.cat] && (!p.isAI || vis.ai);
+    if(show){ if(!map.hasLayer(p.marker)) p.marker.addTo(map); }
+    else if(map.hasLayer(p.marker)){ map.removeLayer(p.marker); }
+  }
+}
+function setRowState(k){ document.querySelectorAll('.lyr[data-k="'+k+'"]').forEach(el=>el.classList.toggle('off',!vis[k])); }
+function updateShowAll(){ const el=document.getElementById('showall'); if(el) el.style.display=Object.values(vis).some(v=>!v)?'inline':'none'; }
+function toggleLayer(k){ if(!(k in vis)) return; vis[k]=!vis[k]; applyVis(); setRowState(k); updateShowAll(); }
+function showAllLayers(){ for(const k in vis) vis[k]=true; applyVis(); for(const k in vis) setRowState(k); updateShowAll(); }
+document.addEventListener('click', e=>{
+  if(e.target && e.target.id==='showall'){ e.preventDefault(); showAllLayers(); return; }
+  const row = e.target.closest && e.target.closest('.lyr');
+  if(row) toggleLayer(row.getAttribute('data-k'));
+});
 
 // ---------- load ----------
 async function loadKmlText(){
