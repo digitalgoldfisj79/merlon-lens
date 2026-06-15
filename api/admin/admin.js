@@ -26,8 +26,10 @@ const BUCKET = 'manuscripts';
 const ALLOWED = ['application/pdf', 'image/webp', 'image/jpeg', 'image/png'];
 
 const sbHeaders = (extra) => Object.assign({ apikey: SB_KEY, authorization: `Bearer ${SB_KEY}` }, extra || {});
-// PostgREST filter, double-quoted so spaces/commas/dots in pin names are safe
-const pinFilter = (pin) => `pin=eq.${encodeURIComponent('"' + pin + '"')}`;
+// PostgREST eq filter: percent-encode the whole pin (incl. . ( ) that
+// encodeURIComponent leaves alone) so PostgREST matches it literally.
+const enc = (s) => encodeURIComponent(s).replace(/[.()]/g, (c) => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+const pinFilter = (pin) => `pin=eq.${enc(pin)}`;
 const slug = (s) => (s || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 const encPath = (p) => p.split('/').map(encodeURIComponent).join('/');
 
